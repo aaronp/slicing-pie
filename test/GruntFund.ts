@@ -1,15 +1,101 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
+
+describe("GruntFund Contract", function () {
+  let GruntFund, gruntFund, owner, admin1, admin2, nonAdmin;
+
+  beforeEach(async () => {
+      [owner, admin1, admin2, nonAdmin] = await ethers.getSigners();
+
+      // Deploy the GruntFund contract with required approvals set to 2
+      GruntFund = await ethers.getContractFactory("GruntFund");
+      gruntFund = await GruntFund.deploy("GruntToken", "GRT", 2);
+      await gruntFund.deployed();
+
+      // Add an admin
+      await gruntFund.connect(owner).addAdmin(admin1.address);
+      await gruntFund.connect(owner).addAdmin(admin2.address);
+  });
+
+});
+
 describe("GruntFund", function () {
   let token;
-  let owner, admin1, admin2, admin3, recipient;
+  let owner, admin1, admin2, admin3, recipient, nonAdmin;
 
   beforeEach(async function () {
-    [owner, admin1, admin2, admin3, recipient] = await ethers.getSigners();
+    [owner, admin1, admin2, admin3, recipient, nonAdmin] = await ethers.getSigners();
 
     const GruntFund = await ethers.getContractFactory("GruntFund");
     token = await GruntFund.deploy("TestToken", "TTK", 2); // 2 required approvals
+
+  });
+
+  describe("getMintRequest", function () {
+    beforeEach(async function () {
+      // Add admins
+      await token.connect(owner).addAdmin(admin1.address);
+      await token.connect(owner).addAdmin(admin2.address);
+      await token.connect(owner).addAdmin(admin3.address);
+    });
+
+    it("Should return the correct details for a mint request", async () => {
+      // Create a mint request by admin1
+
+      await token.connect(admin1).requestMint(nonAdmin.address, 100);
+
+      // Get the mint request details
+      const request = await token.getMintRequest(0);
+
+      expect(request.to).to.equal(nonAdmin.address);
+      expect(request.amount).to.equal(100);
+      expect(request.approvals).to.equal(0);
+      expect(request.executed).to.be.false;
+    });
+
+    it("Should update the mint request approvals correctly", async () => {
+        // Create a mint request by admin1
+        await token.connect(admin1).requestMint(nonAdmin.address, 100);
+
+        // Admin1 approves the request
+        await token.connect(admin1).approveMint(0);
+        let request = await token.getMintRequest(0);
+
+        // Check that the approval count is 1
+        expect(request.approvals).to.equal(1);
+        expect(request.executed).to.be.false;
+
+        // Admin2 approves the request
+        await token.connect(admin2).approveMint(0);
+        request = await token.getMintRequest(0);
+
+        // Check that the approval count is 2 and request is executed
+        expect(request.approvals).to.equal(2);
+        expect(request.executed).to.be.true;
+    });
+
+    it("Should reflect executed status after minting", async () => {
+        // Create a mint request
+        await token.connect(admin1).requestMint(nonAdmin.address, 50);
+
+        // Both admins approve
+        await token.connect(admin1).approveMint(0);
+        await token.connect(admin2).approveMint(0);
+
+        // Get the mint request details after execution
+        const request = await token.getMintRequest(0);
+
+        expect(request.executed).to.be.true;
+
+        // Check if the tokens were minted correctly
+        const balance = await token.balanceOf(nonAdmin.address);
+        expect(balance).to.equal(50);
+    });
+
+    it("Should revert when trying to get a non-existent mint request", async () => {
+        await expect(token.getMintRequest(999)).to.be.reverted;
+    });
   });
 
   describe("Admin Management", function () {

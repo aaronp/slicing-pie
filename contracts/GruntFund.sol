@@ -101,10 +101,6 @@ contract GruntFund is ERC20 {
         emit MintExecuted(requestId, request.to, request.amount);
     }
 
-    function getMintRequestsCount() external view returns (uint256) {
-        return mintRequests.length;
-    }
-
     function getMintRequest(uint256 requestId) external view returns (address to, uint256 amount, uint256 approvals, bool executed) {
         MintRequest storage request = mintRequests[requestId];
         return (request.to, request.amount, request.approvals, request.executed);
