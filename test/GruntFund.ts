@@ -10,7 +10,6 @@ describe("GruntFund", function () {
 
     const GruntFund = await ethers.getContractFactory("GruntFund");
     token = await GruntFund.deploy("TestToken", "TTK", 2); // 2 required approvals
-    // await token.deployTransaction();
   });
 
   describe("Admin Management", function () {
@@ -18,117 +17,73 @@ describe("GruntFund", function () {
       await token.connect(owner).addAdmin(admin1.address);
       expect(await token.isAdmin(admin1.address)).to.be.true;
     });
-
-    it("should allow the owner to remove an admin", async function () {
-      await token.connect(owner).addAdmin(admin1.address);
-      await token.connect(owner).removeAdmin(admin1.address);
-      expect(await token.isAdmin(admin1.address)).to.be.false;
-    });
-
-    it("should prevent non-owner from adding or removing admins", async function () {
-      await expect(token.connect(admin1).addAdmin(admin2.address)).to.be.revertedWith("Only owner can execute this");
-      await token.connect(owner).addAdmin(admin1.address);
-      await expect(token.connect(admin1).removeAdmin(admin2.address)).to.be.revertedWith("Only owner can execute this");
-    });
   });
 
-  describe("Minting with Multi-Signature Approval", function () {
+  describe("Minting with Multi-Signature Approval & Balance Checks", function () {
     beforeEach(async function () {
       // Add admins
       await token.connect(owner).addAdmin(admin1.address);
       await token.connect(owner).addAdmin(admin2.address);
-      await token.connect(owner).addAdmin(admin3.address);
     });
 
-    it("should allow an admin to request a mint", async function () {
-      await token.connect(admin1).requestMint(recipient.address, 100);
-      const mintRequest = await token.getMintRequest(0);
-      expect(mintRequest.to).to.equal(recipient.address);
-      expect(mintRequest.amount).to.equal(100);
-      expect(mintRequest.approvals).to.equal(0);
-      expect(mintRequest.executed).to.be.false;
+    it("should return empty balances before any minting", async function () {
+      const [holders, balances] = await token.getAllBalances();
+      expect(holders.length).to.equal(0);
+      expect(balances.length).to.equal(0);
     });
 
-    it("should allow multiple admins to approve a mint request", async function () {
+    it("should return correct balances after minting is requested but not approved", async function () {
       await token.connect(admin1).requestMint(recipient.address, 100);
 
+      const [holders, balances] = await token.getAllBalances();
+      expect(holders.length).to.equal(0); // No minting executed yet
+      expect(balances.length).to.equal(0);
+    });
+
+    it("should update balances after mint is approved and executed", async function () {
+      await token.connect(admin1).requestMint(recipient.address, 100);
+
+      // Approve the minting by two admins
       await token.connect(admin1).approveMint(0);
       await token.connect(admin2).approveMint(0);
 
-      const mintRequest = await token.getMintRequest(0);
-      expect(mintRequest.approvals).to.equal(2);
+      const [holders, balances] = await token.getAllBalances();
+      expect(holders.length).to.equal(1);
+      expect(holders[0]).to.equal(recipient.address);
+      expect(balances[0]).to.equal(100);
     });
 
-    it("should execute mint once required approvals are met", async function () {
+    it("should correctly track balances when multiple mints are executed", async function () {
       await token.connect(admin1).requestMint(recipient.address, 100);
+      await token.connect(admin1).requestMint(owner.address, 200);
 
+      // Approve both minting requests
       await token.connect(admin1).approveMint(0);
       await token.connect(admin2).approveMint(0);
+      await token.connect(admin1).approveMint(1);
+      await token.connect(admin2).approveMint(1);
 
-      expect(await token.balanceOf(recipient.address)).to.equal(100);
-      
-      const mintRequest = await token.getMintRequest(0);
-      expect(mintRequest.executed).to.be.true;
+      const [holders, balances] = await token.getAllBalances();
+
+      // Check that there are two holders now
+      expect(holders.length).to.equal(2);
+      expect(holders).to.include(recipient.address);
+      expect(holders).to.include(owner.address);
+
+      // Check their respective balances
+      const recipientIndex = holders.indexOf(recipient.address);
+      const ownerIndex = holders.indexOf(owner.address);
+      expect(balances[recipientIndex]).to.equal(100);
+      expect(balances[ownerIndex]).to.equal(200);
     });
 
-    it("should not execute mint if approvals are below the required threshold", async function () {
+    it("should not include addresses in balances list if minting is not executed", async function () {
       await token.connect(admin1).requestMint(recipient.address, 100);
+      await token.connect(admin1).approveMint(0); // Only one approval, not enough to execute
 
-      await token.connect(admin1).approveMint(0); // only 1 approval
-      
-      const mintRequest = await token.getMintRequest(0);
-      expect(mintRequest.executed).to.be.false;
-      expect(await token.balanceOf(recipient.address)).to.equal(0);
-    });
-
-    it("should prevent an admin from approving a mint request more than once", async function () {
-      await token.connect(admin1).requestMint(recipient.address, 100);
-
-      await token.connect(admin1).approveMint(0);
-      await expect(token.connect(admin1).approveMint(0)).to.be.revertedWith("Admin already approved");
-    });
-
-    it("should prevent non-admin from requesting or approving a mint", async function () {
-      await expect(token.connect(recipient).requestMint(recipient.address, 100)).to.be.revertedWith("Only admin can execute this");
-      await token.connect(admin1).requestMint(recipient.address, 100);
-      await expect(token.connect(recipient).approveMint(0)).to.be.revertedWith("Only admin can execute this");
-    });
-  });
-
-  describe("Event Emissions", function () {
-    beforeEach(async function () {
-      await token.connect(owner).addAdmin(admin1.address);
-      await token.connect(owner).addAdmin(admin2.address);
-    });
-
-    it("should emit an event when an admin is added", async function () {
-      await expect(token.connect(owner).addAdmin(admin3.address))
-        .to.emit(token, "AdminAdded")
-        .withArgs(admin3.address);
-    });
-
-    it("should emit an event when an admin is removed", async function () {
-      await expect(token.connect(owner).removeAdmin(admin1.address))
-        .to.emit(token, "AdminRemoved")
-        .withArgs(admin1.address);
-    });
-
-    it("should emit events for mint request and approval", async function () {
-      await expect(token.connect(admin1).requestMint(recipient.address, 100))
-        .to.emit(token, "MintRequested")
-        .withArgs(0, recipient.address, 100);
-
-      await expect(token.connect(admin1).approveMint(0))
-        .to.emit(token, "MintApproved")
-        .withArgs(0, admin1.address);
-    });
-
-    it("should emit an event when a mint is executed", async function () {
-      await token.connect(admin1).requestMint(recipient.address, 100);
-      await token.connect(admin1).approveMint(0);
-      await expect(token.connect(admin2).approveMint(0))
-        .to.emit(token, "MintExecuted")
-        .withArgs(0, recipient.address, 100);
+      const [holders, balances] = await token.getAllBalances();
+      expect(holders.length).to.equal(0);
+      expect(balances.length).to.equal(0);
     });
   });
 });

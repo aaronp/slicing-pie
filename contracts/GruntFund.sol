@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -6,7 +5,11 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract GruntFund is ERC20 {
     address public owner;
+
+    // keep track of owners
     mapping(address => bool) public isAdmin;
+
+    // the number of admins needed to approve a minting request
     uint256 public requiredApprovals;
 
     struct MintRequest {
@@ -34,6 +37,10 @@ contract GruntFund is ERC20 {
         require(isAdmin[msg.sender], "Only admin can execute this");
         _;
     }
+
+    // Track token holders
+    address[] public tokenHolders;
+    mapping(address => bool) private hasHeldTokens;
 
     constructor(string memory name, string memory symbol, uint256 _requiredApprovals) ERC20(name, symbol) {
         owner = msg.sender;
@@ -85,6 +92,12 @@ contract GruntFund is ERC20 {
         request.executed = true;
         _mint(request.to, request.amount);
 
+        // Track token holders
+        if (!hasHeldTokens[request.to]) {
+            tokenHolders.push(request.to);
+            hasHeldTokens[request.to] = true;
+        }
+
         emit MintExecuted(requestId, request.to, request.amount);
     }
 
@@ -95,5 +108,15 @@ contract GruntFund is ERC20 {
     function getMintRequest(uint256 requestId) external view returns (address to, uint256 amount, uint256 approvals, bool executed) {
         MintRequest storage request = mintRequests[requestId];
         return (request.to, request.amount, request.approvals, request.executed);
+    }
+
+    // New function to get all token balances
+    function getAllBalances() external view returns (address[] memory holders, uint256[] memory balances) {
+        uint256 length = tokenHolders.length;
+        uint256[] memory balanceList = new uint256[](length);
+        for (uint256 i = 0; i < length; i++) {
+            balanceList[i] = balanceOf(tokenHolders[i]);
+        }
+        return (tokenHolders, balanceList);
     }
 }
