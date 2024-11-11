@@ -1,15 +1,15 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("MultiSigMintableToken", function () {
+describe("GruntFund", function () {
   let token;
   let owner, admin1, admin2, admin3, recipient;
 
   beforeEach(async function () {
     [owner, admin1, admin2, admin3, recipient] = await ethers.getSigners();
 
-    const MultiSigMintableToken = await ethers.getContractFactory("MultiSigMintableToken");
-    token = await MultiSigMintableToken.deploy("TestToken", "TTK", 2); // 2 required approvals
+    const GruntFund = await ethers.getContractFactory("GruntFund");
+    token = await GruntFund.deploy("TestToken", "TTK", 2); // 2 required approvals
     // await token.deployTransaction();
   });
 
