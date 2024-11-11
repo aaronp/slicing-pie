@@ -1,4 +1,4 @@
-.PHONY: test cli
+.PHONY: test cli dapp
 build:
 	npx hardhat compile
 test:
@@ -13,3 +13,5 @@ console:
 	npx hardhat console --network localhost
 cli:
 	pushd cli && make && popd
+dapp:
+	pushd dapp && make && popd

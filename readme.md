@@ -8,13 +8,17 @@ That is, it tracks grunts' contribution into a start-up in order to ensure a fai
 # The Contract
 [The smart-contract](./contracts/GruntFund.sol) is an ERC20 smart contract written in solidity.
 
-# User Interface
+# Command-line User Interface
+
 You can interact with the contract using a command-line interface:
 
 ```sh
 make cli
 ```
 
+However, to interact with your Metamask account in this way requires access to your SEED_PHRASE in your environment.
+
+A perhaps better way is to just use a web client and integrate in the browser
 
 ## Setup
 
