@@ -1,9 +1,11 @@
-<script>
-  import { onMount } from 'svelte';
-  import { ethers } from 'ethers';
+<script lang="ts">
+  import { onMount } from 'svelte'
+  import { ethers } from 'ethers'
 
-  let accounts = [];
-  let errorMessage = '';
+
+  let accounts = []
+  let errorMessage = ''
+  let infoMessage = ''
 
   // Function to fetch accounts from MetaMask
   async function getAccounts() {
@@ -17,6 +19,7 @@
 
               // Get the list of accounts
               const accountList = await provider.listAccounts();
+              infoMessage = infoMessage + '; listing accounts'
               accounts = accountList.map(account => account.address);
               errorMessage = '';
           } catch (error) {
@@ -39,6 +42,10 @@
 
   {#if errorMessage}
       <p style="color: red;">{errorMessage}</p>
+  {/if}
+
+  {#if infoMessage}
+    <p style="color: blue;">{infoMessage}</p>
   {/if}
 
   <ul>
