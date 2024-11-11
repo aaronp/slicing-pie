@@ -1,13 +1,23 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Svelte + TS</title>
-  </head>
-  <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grunt Fund</title>
+    <link rel="stylesheet" href="dapp.css">
+</head>
+<body>
     <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+    <script type="module" src="/dapp.js" onerror="loadFallback()"></script>
+  <script>
+    function loadFallback() {
+      const fallbackScript = document.createElement('script');
+      fallbackScript.type = 'module';
+      fallbackScript.src = '/src/main.ts';
+      document.body.appendChild(fallbackScript);
+      document.title = "Grunt Fund (local)"
+    }
+  </script>
+
+</body>
 </html>

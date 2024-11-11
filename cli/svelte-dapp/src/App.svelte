@@ -1,47 +1,61 @@
-<script lang="ts">
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+<script>
+  import { onMount } from 'svelte';
+  import { ethers } from 'ethers';
+
+  let accounts = [];
+  let errorMessage = '';
+
+  // Function to fetch accounts from MetaMask
+  async function getAccounts() {
+      if (typeof window.ethereum !== 'undefined') {
+          try {
+              // Request MetaMask accounts
+              await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+              // Create an ethers provider
+              const provider = new ethers.BrowserProvider(window.ethereum);
+
+              // Get the list of accounts
+              const accountList = await provider.listAccounts();
+              accounts = accountList.map(account => account.address);
+              errorMessage = '';
+          } catch (error) {
+              errorMessage = 'Error fetching accounts: ' + error.message;
+          }
+      } else {
+          errorMessage = 'MetaMask is not installed. Please install it to continue.';
+      }
+  }
+
+  // Fetch accounts on component mount (optional)
+  onMount(() => {
+      getAccounts();
+  });
 </script>
 
 <main>
-  <div>
-    <a href="https://vite.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
+  <h1>MetaMask Accounts</h1>
+  <button on:click={getAccounts}>List Accounts</button>
 
-  <div class="card">
-    <Counter />
-  </div>
+  {#if errorMessage}
+      <p style="color: red;">{errorMessage}</p>
+  {/if}
 
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
+  <ul>
+      {#each accounts as account}
+          <li>{account}</li>
+      {/each}
+  </ul>
 </main>
 
 <style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
+  main {
+      text-align: center;
+      margin-top: 2rem;
   }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
+  button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
   }
 </style>

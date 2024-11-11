@@ -1,7 +1,16 @@
-import { defineConfig } from 'vite'
-import { svelte } from '@sveltejs/vite-plugin-svelte'
+cimport { defineConfig } from 'vite';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [svelte()],
-})
+    plugins: [svelte()],
+    build: {
+        outDir: 'dist',
+        rollupOptions: {
+            input: 'index.html',
+            output: {
+                entryFileNames: 'dapp.js',
+                assetFileNames: 'dapp.css'
+            }
+        }
+    }
+});
