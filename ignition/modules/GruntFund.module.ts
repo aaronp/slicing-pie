@@ -1,15 +1,16 @@
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
-// import { ModuleBuilder } from '@hardhat/ignition';
+import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
-export default async function (hre: HardhatRuntimeEnvironment) {
-  const { deployments, ethers } = hre;
-  const { deploy } = deployments;
+const GruntFundModule = buildModule("GruntFundModule", (m) => {
+  const fundName = m.getParameter("name", "Default Grunt Fund");
+  const fundSymbol = m.getParameter("symbol", "DGF");
+  const requiredApprovals = m.getParameter("approvals", "2");
 
-  const GruntFundDeployment = await deploy('GruntFund', {
-    args: ['GruntToken', 'GT', 2], // Change these arguments as needed
-    from: (await ethers.getSigners())[0].address,
-    log: true,
-  });
+  const fund = m.contract("GruntFund", [fundName, fundSymbol, requiredApprovals]);
 
-  console.log(`GruntFund deployed at: ${GruntFundDeployment.address}`);
-}
+  // const lock = m.contract("GruntFund", [fundName, fundSymbol, requiredApprovals], {
+  //   from : '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955'
+  // });
+  return { fund };
+});
+
+export default GruntFundModule;

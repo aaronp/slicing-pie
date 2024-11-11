@@ -37,3 +37,9 @@ make cli
 However, to interact with your Metamask account in this way requires access to your SEED_PHRASE in your environment.
 
 A perhaps better way is to just use a web client and integrate in the browser
+
+# Building / Deploying
+
+The contract is deployed locally using [Ignition](https://hardhat.org/ignition/docs/guides/deploy) as triggered by `make deploy` (which also runs the tests):
+
+![./docs/deployment.png](./docs/deployment.png)
