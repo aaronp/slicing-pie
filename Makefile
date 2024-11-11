@@ -8,3 +8,6 @@ deploy:
 # will run a network at http://127.0.0.1:8545
 start-network:
 	npx hardhat node
+# see https://hardhat.org/hardhat-runner/docs/guides/hardhat-console
+console:
+	npx hardhat console --network localhost
