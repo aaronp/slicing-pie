@@ -8,6 +8,12 @@
 </head>
 <body>
     <div id="app"></div>
+    <!--
+    We bundle the app into a dapp.js, but that isn't available during testing.
+
+    One option is to navigate to local.html (which we have).
+    Another is to add this fallback to try and use our local dev file
+    -->
     <script type="module" src="/dapp.js" onerror="loadFallback()"></script>
   <script>
     function loadFallback() {

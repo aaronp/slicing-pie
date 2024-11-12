@@ -17,7 +17,7 @@ We've just expanded on that to add an approval step, so admins can approve those
 TODO:
  * deploy the contract via Makefile ✅ 
  * dapp: 🦕 
-   * 1. Set the contract address if there isn't already one in local storage
+   * 1. Set the contract address if there isn't already one in local storage ✅ 
    * 2. list allocations and show the pie / listed allocations
    * 3. Allocate pie to a grunt
    *   3.1 keep a name/address mapping in local storage
