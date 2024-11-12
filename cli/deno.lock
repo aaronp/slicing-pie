@@ -72,6 +72,39 @@
       "integrity": "sha512-yLSH4py7oFH3oG/9K+XWrz1pSi3dfUrWEnInbxMfArOfc1+33BlGPQtLsOYwvdMy11AwUBetYuaRxSPqgkq+8g=="
     }
   },
+  "remote": {
+    "https://deno.land/std@0.200.0/collections/filter_values.ts": "16e1fc456a7969e770ec5b89edf5ac97b295ca534b47c1a83f061b409aad7814",
+    "https://deno.land/std@0.200.0/collections/without_all.ts": "1e3cccb1ed0659455b473c0766d9414b7710d8cef48862c899f445178f66b779",
+    "https://deno.land/std@0.200.0/dotenv/load.ts": "0636983549b98f29ab75c9a22a42d9723f0a389ece5498fe971e7bb2556a12e2",
+    "https://deno.land/std@0.200.0/dotenv/mod.ts": "2caa157ee5afbf74bd85bd6e8f286cb6363a1e4d10cf3376223346b33a7ea75e",
+    "https://esm.sh/ethers@6.7.1": "a32dd4e30cb236253371bf606e9d64ad2ed320e99df312852e158a88ea5cf163",
+    "https://esm.sh/v135/@adraffy/ens-normalize@1.9.2/denonext/ens-normalize.mjs": "40dcb4152d325948138d653df211120dca1b9dc118eb4c23a5402eba3bdcc7bc",
+    "https://esm.sh/v135/@noble/hashes@1.1.2/denonext/_assert.js": "5b79fe05634fc1bddb136a50dd7b74c2e7b1ee26359e3f40bb80e74aa2e552f7",
+    "https://esm.sh/v135/@noble/hashes@1.1.2/denonext/_sha2.js": "3b49b42e3acdb083629a6c0609df862688aecaca32738c0b5948bf1e46393b89",
+    "https://esm.sh/v135/@noble/hashes@1.1.2/denonext/crypto.js": "54993c8fd344c903a4f43afe6a06aba9d9f37ebec91012c8069301560cd399fa",
+    "https://esm.sh/v135/@noble/hashes@1.1.2/denonext/hmac.js": "d10ff7fed4df81e051cb9b45cf91009ff77e4dd708222959671f76560009bce4",
+    "https://esm.sh/v135/@noble/hashes@1.1.2/denonext/pbkdf2.js": "9c9781ee2050a60ffbec8f705fac503dd0a947a4166b5544f448cf172608441d",
+    "https://esm.sh/v135/@noble/hashes@1.1.2/denonext/ripemd160.js": "f76e0fb2a5c4896c9dafb9dbe509817cccad995ca77d475f85178095ec0a1fcd",
+    "https://esm.sh/v135/@noble/hashes@1.1.2/denonext/scrypt.js": "7026b6c201011da4098650d7a425cc5c1f8569721f293e714da3e2243701adce",
+    "https://esm.sh/v135/@noble/hashes@1.1.2/denonext/sha256.js": "6c7065c817415da1b11eafb212d4ef556f9a718ff28d4a5d46ac2733a0b54f94",
+    "https://esm.sh/v135/@noble/hashes@1.1.2/denonext/sha3.js": "f651c6ad364c6d90086c12314d796cbb3e05ba7825ab2b4a00bcb8643a314d5b",
+    "https://esm.sh/v135/@noble/hashes@1.1.2/denonext/sha512.js": "ca0b51b4f74d098f218991f2bedeecef713798ef319bf59da5e7fd232e39f5b5",
+    "https://esm.sh/v135/@noble/hashes@1.1.2/denonext/utils.js": "6ee8bafe743341503144c1ac83f0b685d908917c42c9a8eb51c0bb67a0918a8b",
+    "https://esm.sh/v135/@noble/secp256k1@1.7.1/denonext/secp256k1.mjs": "5104c9675943707b7d2a2e1a160f8d09151f12fc95fffc2613fcba34e8a88719",
+    "https://esm.sh/v135/aes-js@4.0.0-beta.5/denonext/aes-js.mjs": "b1b896f1484bbfc1178a000fd60d00c9f73ef9d30f5b8dcdf9796e684b231f86",
+    "https://esm.sh/v135/ethers@6.7.1/denonext/abi.js": "4704b5aca14af0ec010cf10e030d23e989a0369175549e8527a423ba4a44bca8",
+    "https://esm.sh/v135/ethers@6.7.1/denonext/address.js": "2e4bb7e459cab577d8e5e0ee1da19141afcfcd8d0b6e9dc47a0a88742bf399bb",
+    "https://esm.sh/v135/ethers@6.7.1/denonext/constants.js": "4c9195dae28bbc33e2b135d32edf68e2fdb7ec12d7c3b295355babaeb834954d",
+    "https://esm.sh/v135/ethers@6.7.1/denonext/contract.js": "493f0f94a02d9f17a035a541dc4c967c33a5fbd74e53c0fa3d36806fc1c6f78f",
+    "https://esm.sh/v135/ethers@6.7.1/denonext/crypto.js": "db621e8b1f7058f48634dc6942bcc2101afa47ecf7303764da80baddfa57f949",
+    "https://esm.sh/v135/ethers@6.7.1/denonext/ethers.mjs": "3271bfda08547748b10df75528e1a0da7ee4a9dbe804642f6e7003f215706a13",
+    "https://esm.sh/v135/ethers@6.7.1/denonext/hash.js": "148b5df417460ae9734df235529ddea37e0e52d3f354bb97d5083bcf5786306a",
+    "https://esm.sh/v135/ethers@6.7.1/denonext/providers.js": "3f18e45e58e777996cce545f660c46762337dc274737abea65d19512374b9965",
+    "https://esm.sh/v135/ethers@6.7.1/denonext/transaction.js": "094264bfd241a0a911144ff61a17688237684ec41dfffab7b1e2a5e6318201eb",
+    "https://esm.sh/v135/ethers@6.7.1/denonext/utils.js": "a1e058eec9ba9e5e08f6f74768d44959a7ea2eab9391bf3366a325c139f7e05d",
+    "https://esm.sh/v135/ethers@6.7.1/denonext/wallet.js": "b81b2bb262d287e66edb74d15c77294066819f1389e2f758d2c8da1483aa7700",
+    "https://esm.sh/v135/ethers@6.7.1/denonext/wordlists.js": "eddaab614f912e78efc47c33442d60a021cc86a0f6a894ab4de22cfdc34e59db"
+  },
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@1"

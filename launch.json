@@ -1,0 +1,12 @@
+  {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "pwa-node",
+        "request": "launch",
+        "name": "Launch Hardhat Tests",
+        "url": "http://localhost:8545",
+        "webRoot": "${workspaceFolder}"
+      }
+    ]
+  }

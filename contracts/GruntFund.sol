@@ -1,118 +1,148 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+/// @title GruntFund - A contract for tracking token allocations and balances
+/// @author 
+/// @notice This contract allows minting, transferring, and force-transferring tokens with specific permissions.
+/// @dev Uses Solidity 0.8.0 or higher to handle arithmetic without SafeMath.
 
-contract GruntFund is ERC20 {
+contract GruntFund {
+    /// @notice The name of the token
+    string public name;
+
+    /// @notice The symbol of the token
+    string public symbol;
+
+    /// @notice The address of the contract owner
     address public owner;
 
-    // keep track of owners
-    mapping(address => bool) public isAdmin;
+    /// @notice Mapping of balances by address
+    mapping(address => uint256) public balancesByAddress;
 
-    // the number of admins needed to approve a minting request
-    uint256 public requiredApprovals;
+    /// @notice List of all addresses with balances
+    address[] public addresses;
 
-    struct MintRequest {
-        address to;
-        uint256 amount;
-        uint256 approvals;
-        mapping(address => bool) approved;
-        bool executed;
+    /// @notice List of allowed minter addresses
+    mapping(address => bool) public allowedMinters;
+
+    /// @dev Emitted when a new minter is added
+    event MinterAdded(address indexed minter);
+
+    /// @dev Emitted when a minter is removed
+    event MinterRemoved(address indexed minter);
+
+    /// @dev Emitted when tokens are allocated
+    event Allocated(address indexed recipient, uint256 amount, string documentHash);
+
+    /// @dev Emitted when tokens are transferred
+    event Transfer(address indexed from, address indexed to, uint256 amount, string documentHash);
+
+    /// @dev Emitted when a forced transfer occurs
+    event ForcedTransfer(address indexed from, address indexed to, uint256 amount);
+
+    /// @param _name The name of the token
+    /// @param _symbol The symbol of the token
+    /// @param _owner The address of the contract owner
+    constructor(string memory _name, string memory _symbol, address _owner) {
+        name = _name;
+        symbol = _symbol;
+        owner = _owner;
+        allowedMinters[_owner] = true;
     }
 
-    MintRequest[] public mintRequests;
-
-    event AdminAdded(address indexed admin);
-    event AdminRemoved(address indexed admin);
-    event MintRequested(uint256 indexed requestId, address indexed to, uint256 amount);
-    event MintApproved(uint256 indexed requestId, address indexed admin);
-    event MintExecuted(uint256 indexed requestId, address indexed to, uint256 amount);
-
+    /// @notice Modifier to restrict access to the contract owner
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner can execute this");
+        require(msg.sender == owner, "Caller is not the owner");
         _;
     }
 
-    modifier onlyAdmin() {
-        require(isAdmin[msg.sender], "Only admin can execute this");
+    /// @notice Modifier to restrict access to allowed minters
+    modifier onlyMinters() {
+        require(allowedMinters[msg.sender], "Caller is not an allowed minter");
         _;
     }
 
-    // Track token holders
-    address[] public tokenHolders;
-    mapping(address => bool) private hasHeldTokens;
-
-    constructor(string memory name, string memory symbol, uint256 _requiredApprovals) ERC20(name, symbol) {
-        owner = msg.sender;
-        isAdmin[msg.sender] = true;
-        requiredApprovals = _requiredApprovals;
+    /// @notice Adds a new minter address
+    /// @param allowedAddress The address to be added as a minter
+    /// @dev Can only be called by an existing allowed minter
+    function addMinter(address allowedAddress) external onlyMinters {
+        allowedMinters[allowedAddress] = true;
+        emit MinterAdded(allowedAddress);
     }
 
-    function addAdmin(address admin) external onlyOwner {
-        require(!isAdmin[admin], "Address is already an admin");
-        isAdmin[admin] = true;
-        emit AdminAdded(admin);
+    /// @notice Removes an allowed minter
+    /// @param minter The address to be removed from allowed minters
+    /// @dev Can only be called by the contract owner
+    function removeMinter(address minter) external onlyOwner {
+        allowedMinters[minter] = false;
+        emit MinterRemoved(minter);
     }
 
-    function removeAdmin(address admin) external onlyOwner {
-        require(isAdmin[admin], "Address is not an admin");
-        isAdmin[admin] = false;
-        emit AdminRemoved(admin);
-    }
-
-    function requestMint(address to, uint256 amount) external onlyAdmin {
-        MintRequest storage newRequest = mintRequests.push();
-        newRequest.to = to;
-        newRequest.amount = amount;
-        newRequest.approvals = 0;
-        newRequest.executed = false;
-
-        emit MintRequested(mintRequests.length - 1, to, amount);
-    }
-
-    function approveMint(uint256 requestId) external onlyAdmin {
-        MintRequest storage request = mintRequests[requestId];
-        require(!request.executed, "Mint request already executed");
-        require(!request.approved[msg.sender], "Admin already approved");
-
-        request.approved[msg.sender] = true;
-        request.approvals += 1;
-
-        emit MintApproved(requestId, msg.sender);
-
-        if (request.approvals >= requiredApprovals) {
-            _executeMint(requestId);
+    /// @notice Mints tokens to a recipient
+    /// @param recipient The address to receive the tokens
+    /// @param amount The amount of tokens to mint
+    /// @param documentHash A hash representing supporting documentation
+    /// @dev Can only be called by allowed minters
+    function mint(address recipient, uint256 amount, string memory documentHash) external onlyMinters {
+        balancesByAddress[recipient] += amount;
+        if (!_addressExists(recipient)) {
+            addresses.push(recipient);
         }
+        emit Allocated(recipient, amount, documentHash);
     }
 
-    function _executeMint(uint256 requestId) internal {
-        MintRequest storage request = mintRequests[requestId];
-        require(!request.executed, "Mint request already executed");
+    /// @notice Transfers tokens to another address
+    /// @param to The address to transfer tokens to
+    /// @param amount The amount of tokens to transfer
+    /// @param documentHash A hash representing supporting documentation
+    /// @dev Can be called by the sender or an allowed minter
+    function transfer(address to, uint256 amount, string memory documentHash) external {
+        require(msg.sender == owner || msg.sender == to || allowedMinters[msg.sender], "Unauthorized transfer");
+        require(balancesByAddress[msg.sender] >= amount, "Insufficient balance");
 
-        request.executed = true;
-        _mint(request.to, request.amount);
+        balancesByAddress[msg.sender] -= amount;
+        balancesByAddress[to] += amount;
 
-        // Track token holders
-        if (!hasHeldTokens[request.to]) {
-            tokenHolders.push(request.to);
-            hasHeldTokens[request.to] = true;
+        if (!_addressExists(to)) {
+            addresses.push(to);
         }
 
-        emit MintExecuted(requestId, request.to, request.amount);
+        emit Transfer(msg.sender, to, amount, documentHash);
     }
 
-    function getMintRequest(uint256 requestId) external view returns (address to, uint256 amount, uint256 approvals, bool executed) {
-        MintRequest storage request = mintRequests[requestId];
-        return (request.to, request.amount, request.approvals, request.executed);
-    }
+    /// @notice Forcefully transfers tokens from one address to another
+    /// @param from The address to deduct tokens from
+    /// @param to The address to transfer tokens to
+    /// @param amount The amount of tokens to transfer
+    /// @dev Can only be called by the contract owner
+    function forceTransfer(address from, address to, uint256 amount) external onlyOwner {
+        require(balancesByAddress[from] >= amount, "Insufficient balance");
 
-    // New function to get all token balances
-    function getAllBalances() external view returns (address[] memory holders, uint256[] memory balances) {
-        uint256 length = tokenHolders.length;
-        uint256[] memory balanceList = new uint256[](length);
-        for (uint256 i = 0; i < length; i++) {
-            balanceList[i] = balanceOf(tokenHolders[i]);
+        balancesByAddress[from] -= amount;
+        balancesByAddress[to] += amount;
+
+        if (!_addressExists(to)) {
+            addresses.push(to);
         }
-        return (tokenHolders, balanceList);
+
+        emit ForcedTransfer(from, to, amount);
+    }
+
+    /// @notice Checks if an address already exists in the addresses array
+    /// @param addr The address to check
+    /// @return True if the address exists, false otherwise
+    function _addressExists(address addr) internal view returns (bool) {
+        for (uint256 i = 0; i < addresses.length; i++) {
+            if (addresses[i] == addr) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// @notice Returns the list of all addresses with balances
+    /// @return An array of addresses
+    function getAllAddresses() external view returns (address[] memory) {
+        return addresses;
     }
 }

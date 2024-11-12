@@ -1,16 +1,10 @@
-import { defineConfig } from 'vite';
-import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { defineConfig } from 'vitest/config';
+import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig({
-    plugins: [svelte()],
-    build: {
-        outDir: 'dist',
-        rollupOptions: {
-            input: 'index.html',
-            output: {
-                entryFileNames: 'dapp.js',
-                assetFileNames: 'dapp.css'
-            }
-        }
-    }
+	plugins: [sveltekit()],
+
+	test: {
+		include: ['src/**/*.{test,spec}.{js,ts}']
+	}
 });

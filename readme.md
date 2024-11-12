@@ -18,13 +18,10 @@ TODO:
  * deploy the contract via Makefile ✅ 
  * dapp: 🦕 
    * 1. Set the contract address if there isn't already one in local storage ✅ 
-   * 2. list allocations and show the pie / listed allocations
-   * 3. Allocate pie to a grunt
-   *   3.1 keep a name/address mapping in local storage
-   * 4. Show a pending table for pending allocations
-   * 5. add an 'approve' button if our address is an admin or owner
-   * 6. fix the contract so that the same admin who created the allocation can't also approve it.
-   * 7. list all contract events
+   * 2. Allocate pie to a grunt ✅ 
+   *   2.1 keep a name/address mapping in local storage <- MVP, just have a text-area with <name>:<address> mappings ✅ 
+   * 3. list allocations and show the pie / listed allocations
+   * 4. list all contract events
 
 # Command-line User Interface
 

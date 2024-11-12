@@ -1,2 +1,2 @@
 run:
-	 deno --allow-net --allow-env  main.ts
+	 deno --allow-net --allow-env --allow-read main.ts

@@ -1,0 +1,69 @@
+<script lang="ts">
+    import { onMount } from 'svelte'
+    import { goto } from '$app/navigation'
+    import { Button, TextField, Collapse } from 'svelte-ux'
+    import { writable, derived } from 'svelte/store'
+	  import { type Settings, loadSettings, saveSettings } from '$lib'
+
+  
+    let settings = $state(loadSettings())
+
+    let gruntAddresses = writable(settings.grunts)
+    // Sync the writable store with localStorage
+    gruntAddresses.subscribe(value => {
+        settings.grunts = value
+        onSave()
+    })
+
+
+    let fundAddresses = writable(settings.funds)
+    // Sync the writable store with localStorage
+    fundAddresses.subscribe(value => {
+        settings.funds = value
+        onSave()
+    })
+
+
+  
+    function onSave() {
+      
+      saveSettings(settings)
+    }
+  </script>
+
+<h1 class="text-2xl ml-2 font-bold mb-2">Settings</h1>  
+
+<!-- Funds Input Section -->
+
+<div class="grid grid-cols-1 gap-2 w-1/2">
+  <div class="m-2 p-2 bg-gray-200">
+  <Collapse name="Grunts">
+    <textarea
+        id="funds"
+        class="p-2 h-60 bg-gray-100 dark:bg-gray-800 w-1/2"
+        bind:value={$gruntAddresses}
+        style="width: 100%; height: 100px; resize: vertical;"
+        placeholder="Enter grunts in the format: label:address"></textarea>
+    </Collapse>
+  </div>
+  <div class="m-2 p-2 bg-gray-200">
+  <Collapse name="Funds">
+    <textarea
+        id="funds"
+        class="p-2 h-60 bg-gray-100 dark:bg-gray-800 w-1/2"
+        bind:value={$fundAddresses}
+        style="width: 100%; height: 100px; resize: vertical;"
+        placeholder="Enter grunts in the format: label:address"></textarea>
+    </Collapse>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 gap-2 mt-8 ml-2 w-1/2">
+  <h2 class="text-3xl font-bold">Contract Address</h2>
+
+  <p class="pt-2">The deployed Kind fund address, which we should enter here (see example below).</p>
+
+  <div class="text-lg"><TextField labelPlacement="float" hint="The address of the deployed grunt fund contract" class="w-3/4 text-lg mt-2" label="Contract Address" bind:value={settings.kindContractAddress} /></div>
+</div>
+
+<!-- <p class="p-8"><img src='/deployment.png' alt="Smart Contract Deploy" /></p> -->
