@@ -16,6 +16,9 @@ We've just expanded on that to add an approval step, so admins can approve those
 
 TODO:
  * deploy the contract via Makefile ✅ 
+ * cli:
+   * 1. Add transfer, forceTransfer, removeMinter, and isAllowedMinter to the CLi
+   * 2. Create a Kind CLI w/ getAllFunds and mint functions
  * dapp: 🦕 
    * 1. Set the contract address if there isn't already one in local storage ✅ 
    * 2. Allocate pie to a grunt ✅ 

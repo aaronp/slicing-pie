@@ -1,28 +1,33 @@
 import { ethers } from "ethers"
 import { type Settings as AppSettings, type MetaMask } from "$lib"
 
+const abi = [
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+  "function owner() view returns (address)",
+  "function balancesByAddress(address) view returns (uint256)",
+  "function addresses(uint256) view returns (address)",
+  "function allowedMinters(address) view returns (bool)",
+  "function addMinter(address) external",
+  "function removeMinter(address) external",
+  "function mint(address, uint256, string) external",
+  "function transfer(address, uint256, string) external",
+  "function forceTransfer(address, address, uint256) external",
+  "function getAllAddresses() external view returns (address[] memory)",
+  "event MinterAdded(address indexed minter)",
+  "event MinterRemoved(address indexed minter)",
+  "event Allocated(address indexed recipient, uint256 amount, string documentHash)",
+  "event Transfer(address indexed from, address indexed to, uint256 amount, string documentHash)",
+  "event ForcedTransfer(address indexed from, address indexed to, uint256 amount)"
+];
+
+
 export class GruntFund {
   public contract: ethers.Contract;
   public contractWithSigner: ethers.BaseContract;
   public signer : ethers.Signer;
   public provider : ethers.Provider;
   constructor(contractAddress: string, provider: ethers.Provider, signer: ethers.Signer) {
-
-
-    const abi = [
-      "function name() view returns (string)",
-      "function symbol() view returns (string)",
-      "function owner() view returns (address)",
-      "function balancesByAddress(address) view returns (uint256)",
-      "function addresses(uint256) view returns (address)",
-      "function allowedMinters(address) view returns (bool)",
-      "function addMinter(address) external",
-      "function removeMinter(address) external",
-      "function mint(address, uint256, string) external",
-      "function transfer(address, uint256, string) external",
-      "function forceTransfer(address, address, uint256) external",
-      "function getAllAddresses() public view returns (address[])"
-    ];
 
     this.contract = new ethers.Contract(contractAddress, abi, provider)
     this.contractWithSigner = this.contract.connect(signer)
@@ -46,6 +51,29 @@ export class GruntFund {
     return new GruntFund(contractAddress, provider, signer)
   }
 
+  async events() {
+    const filter = {
+      address: await this.contract.getAddress(),
+      fromBlock: 0,
+      toBlock: 'latest',
+    };
+
+    const iface = new ethers.Interface(abi)
+    const logs = await this.provider.getLogs(filter)
+    const payloads = logs.map((log) => {
+      const parsedLog = iface.parseLog(log)
+      const args = parsedLog?.args.toObject()
+      const mappedArgs = Object.keys(args).reduce((acc, key) => {
+        acc[key] = args[key].toString()
+        return acc
+      }, {});
+      return {
+        event: parsedLog.name,
+        args: mappedArgs
+      }
+    })
+    return payloads
+  }
   
   // Read-only methods
   async getName(): Promise<string> {
