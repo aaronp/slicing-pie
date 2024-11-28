@@ -36,6 +36,20 @@ export class GruntFund {
     this.provider = provider
   }
 
+  static forSettings(address : string, account : MetaMask): GruntFund {
+    return new GruntFund(address, account.provider, account.signer)
+  }
+
+  // Static method to initialize GruntFund with a browser provider
+  static async forAddress(contractAddress: string): Promise<GruntFund> {
+    if (!window.ethereum) {
+      throw new Error("No Ethereum provider found. Install MetaMask or another wallet.");
+    }
+    const provider = new ethers.BrowserProvider(window.ethereum)
+    await provider.send("eth_requestAccounts", [])
+    const signer = await provider.getSigner()
+    return new GruntFund(contractAddress, provider, signer)
+  }
   
   // Read-only methods
   async getName(): Promise<string> {

@@ -22,7 +22,6 @@
 
     let account : Result<MetaMask> = $state("not connected")
 
-
     onMount(async () => {
         await connect()
 
@@ -57,6 +56,6 @@
     {/if}
 
     {#if settings != null && gruntFund != null }
-            <Pie {settings} {gruntFund} fundAddress={id} />
+        <Pie {settings} {gruntFund} fundAddress={id} />
     {/if}
 {/key}

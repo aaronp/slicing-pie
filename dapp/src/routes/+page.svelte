@@ -57,8 +57,11 @@
 <div>{message}</div>
 
 {#if (typeof account === 'string') }
-    not logged in
-    <Button onclick={onConnectAccount} >Connect Metamask Account</Button>
+  <div class="text-white">
+      not logged in
+      <Button onclick={onConnectAccount} class="text-white">Connect Metamask Account</Button>
+      {account}
+  </div>
 {/if}
 
 {#if typeof account !== 'string'}
