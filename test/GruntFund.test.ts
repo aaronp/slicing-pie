@@ -9,7 +9,7 @@ describe("GruntFund Contract", function () {
   beforeEach(async () => {
     [owner, minter, addr1, addr2] = await ethers.getSigners()
     const GruntFundFactory = await ethers.getContractFactory("GruntFund")
-    gruntFund = await GruntFundFactory.deploy("GruntToken", "GT")
+    gruntFund = await GruntFundFactory.deploy("GruntToken", "GT", owner.address)
   })
 
   describe("Deployment", function () {
@@ -106,9 +106,9 @@ describe("GruntFund Contract", function () {
     })
 
     it("Owner can force transfer tokens and emit an event", async function () {
-      await expect(gruntFund.forceTransfer(addr1.address, addr2.address, 500))
+      await expect(gruntFund.forceTransfer(addr1.address, addr2.address, 500, "some-hash"))
         .to.emit(gruntFund, "ForcedTransfer")
-        .withArgs(addr1.address, addr2.address, 500)
+        .withArgs(addr1.address, addr2.address, 500, "some-hash")
 
       expect(await gruntFund.balancesByAddress(addr1.address)).to.equal(500)
       expect(await gruntFund.balancesByAddress(addr2.address)).to.equal(500)
@@ -116,11 +116,11 @@ describe("GruntFund Contract", function () {
     })
 
     it("Non-owners cannot force transfer tokens", async function () {
-      await expect(gruntFund.connect(addr1).forceTransfer(addr1.address, addr2.address, 500)).to.be.revertedWith("Caller is not the owner")
+      await expect(gruntFund.connect(addr1).forceTransfer(addr1.address, addr2.address, 500, "nope")).to.be.revertedWith("Caller is not the owner")
     })
 
     it("Forced transfer with insufficient balance should revert", async function () {
-      await expect(gruntFund.forceTransfer(addr1.address, addr2.address, 2000)).to.be.revertedWith("Insufficient balance")
+      await expect(gruntFund.forceTransfer(addr1.address, addr2.address, 2000, "nope")).to.be.revertedWith("Insufficient balance")
     })
   })
 

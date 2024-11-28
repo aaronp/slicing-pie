@@ -21,14 +21,12 @@ describe("KindFund Contract", function () {
 
     // Deploy a GruntFund contract
     const GruntFund = await ethers.getContractFactory("GruntFund")
-    holdingKindFund = await GruntFund.deploy("GruntFund1", "GF1")
+    holdingKindFund = await GruntFund.deploy("GruntFund1", "GF1", owner.address)
 
     holdingKindFundAddress = await holdingKindFund.getAddress()
     console.log(`deployed to ${holdingKindFundAddress}`)
 
-    // await holdingKindFund.deployed()
-
-    gruntFund2 = await GruntFund.deploy("GruntFund2", "GF2")
+    gruntFund2 = await GruntFund.deploy("GruntFund2", "GF2", owner.address)
     gruntFund2Address = await gruntFund2.getAddress()
     // const deployTxn2 = gruntFund2.deploymentTransaction()
     // console.log(`deployed 2: ${JSON.stringify(deployTxn1, null, 2)}`)
