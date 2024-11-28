@@ -92,13 +92,13 @@ export class GruntFund {
   }
 
   // Write methods
-  async addMinter(minterAddress: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+  async addMinter(minterAddress: string): Promise<ethers.ContractTransaction> {
     // const contractWithSigner = this.contract.connect(signer)
     return await this.contractWithSigner.addMinter(minterAddress)
   }
 
   async removeMinter(minterAddress: string): Promise<ethers.ContractTransaction> {
-    const contractWithSigner = this.contract.connect(signer)
+    // const contractWithSigner = this.contract.connect(signer)
     return await this.contractWithSigner.removeMinter(minterAddress)
   }
 

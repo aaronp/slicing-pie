@@ -5,8 +5,17 @@ import { type Web3Settings, type EnvSettings, gruntFundForAddress, saveSettings 
 
 export const listAddresses = async (gruntFund : GruntFund) => {
   await spin(`Showing addresses ...`)(async () => {
-    const result = await gruntFund.getAllAddresses()
-    console.log(JSON.stringify(result, null, 2))
+    const result : string[] = await gruntFund.getAllAddresses()
+
+    const mapped = await Promise.all(result.map(async (a) => {
+      const isMinter = await gruntFund.isAllowedMinter(a)
+      return {
+        address : a,
+        isMinter : isMinter
+      }
+    }))
+
+    console.log(JSON.stringify(mapped, null, 2))
   })
 }
 

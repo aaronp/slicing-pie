@@ -17,7 +17,7 @@ export const addMinter = async (gruntFund : GruntFund) => {
 
   console.log(`address:${address}`)
   await spin(`Making ${address} a minter ...`)(async () => {
-    const result = await gruntFund.addMinter(String(address), c.signer)
+    const result = await gruntFund.addMinter(String(address))
     console.log('addMinter result: ', JSON.stringify(result, null, 2))
   })
 }
