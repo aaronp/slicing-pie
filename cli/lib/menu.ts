@@ -2,6 +2,7 @@ import { outro, select } from "npm:@clack/prompts"
 import "https://deno.land/std@0.200.0/dotenv/load.ts"
 import { about, updateSettings, listAddresses } from "./actionSettings.ts"
 import { doMint, addMinter } from "./actionMint.ts"
+import { transfer, forceTansfer } from "./actionTransfer.ts"
 import { listEvents } from "./actionEvents.ts"
 import { GruntFund } from "./GruntFund.ts"
 import { getBalances, getSingleBalance } from "./actionBalances.ts"
@@ -16,9 +17,11 @@ export const userMenuPrompt = async (gruntFund : GruntFund, web3Settings : Web3S
       { value: 'getAllBalances', label: 'Get All Balances' },
       { value: 'getBalance', label: 'Get Balance' },
       { value: 'mint', label: 'Mint Tokens' },
+      { value: 'transfer', label: 'Transfer Tokens' },
+      { value: 'forceTransfer', label: 'Force Transfer Tokens' },
+      { value: 'addMinter', label: 'Add a minter' },
       { value: 'about', label: 'About' },
       { value: 'addresses', label: 'Show addresses' },
-      { value: 'addMinter', label: 'Add a minter' },
       { value: 'quit', label: 'Quit' },
     ],
   });
@@ -37,12 +40,14 @@ export const userMenuPrompt = async (gruntFund : GruntFund, web3Settings : Web3S
       await doMint(gruntFund)
       break
     }
-
-    case 'events': {
-      await listEvents(gruntFund)
+    case 'transfer': {
+      await transfer(gruntFund, web3Settings)
       break
     }
-
+    case 'forceTransfer': {
+      await forceTansfer(gruntFund, web3Settings)
+      break
+    }
     case 'getAllBalances': {
       await getBalances(gruntFund)
       break

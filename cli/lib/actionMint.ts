@@ -1,5 +1,5 @@
 import { text } from "npm:@clack/prompts"
-import { spin } from "./util.ts"
+import { spin, readAmount, readHash } from "./util.ts"
 import { GruntFund } from "./GruntFund.ts"
 
 export const addMinter = async (gruntFund : GruntFund) => {
@@ -32,30 +32,9 @@ export const doMint = async (gruntFund : GruntFund) => {
           if (value.length > 0 && !value.startsWith('0x')) return `This doesn't look like an address`
         },
       })
-      const amount = await text({
-        message: 'How many?',
-        placeholder: '1',
-        initialValue: '',
-        validate(value) {
-          let ok = true
-          try {
-            const x = parseInt(value)
-            ok = x > 0
-          } catch (e) {
-            ok = false
-          }
-          if (!ok) return `Invalid amount ${value}`
-        },
-      })
-      const hash = await text({
-        message: 'What is the document hash for the reference?',
-        placeholder: 'hash...',
-        initialValue: '',
-        validate(value) {
-          // if (value.length === 0) return `The address is required!`
-          if (value.length === 0) return `Please enter the hash from a document`
-        },
-      })
+      const amount = await readAmount()
+      const hash = await readHash()
+      
       await spin(`Minting ${amount.toString()} for ${toAddress.toString()} ...`)(async () => {
         const result = await gruntFund.mint(toAddress.toString(), parseInt(amount.toString()), hash.toString())
         console.log('mint result: ', JSON.stringify(result, null, 2))

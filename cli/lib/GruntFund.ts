@@ -116,16 +116,17 @@ export class GruntFund {
     amount: ethers.BigNumberish,
     documentHash: string
   ): Promise<ethers.ContractTransaction> {
-    const contractWithSigner = this.contract.connect(signer);
-    return await contractWithSigner.transfer(to, amount, documentHash);
+    // const contractWithSigner = this.contract.connect(signer);
+    return await this.contract.transfer(to, amount, documentHash);
   }
 
   async forceTransfer(
     from: string,
     to: string,
-    amount: ethers.BigNumberish
+    amount: ethers.BigNumberish,
+    documentHash: string
   ): Promise<ethers.ContractTransaction> {
     // const contractWithSigner = this.contract.connect(signer);
-    return await this.contractWithSigner.forceTransfer(from, to, amount);
+    return await this.contractWithSigner.forceTransfer(from, to, amount, documentHash);
   }
 }

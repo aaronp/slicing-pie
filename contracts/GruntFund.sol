@@ -38,7 +38,7 @@ contract GruntFund {
     event Transfer(address indexed from, address indexed to, uint256 amount, string documentHash);
 
     /// @dev Emitted when a forced transfer occurs
-    event ForcedTransfer(address indexed from, address indexed to, uint256 amount);
+    event ForcedTransfer(address indexed from, address indexed to, uint256 amount, string documentHash);
 
     /// @param _name The name of the token
     /// @param _symbol The symbol of the token
@@ -115,7 +115,7 @@ contract GruntFund {
     /// @param to The address to transfer tokens to
     /// @param amount The amount of tokens to transfer
     /// @dev Can only be called by the contract owner
-    function forceTransfer(address from, address to, uint256 amount) external onlyOwner {
+    function forceTransfer(address from, address to, uint256 amount, string memory documentHash) external onlyOwner {
         require(balancesByAddress[from] >= amount, "Insufficient balance");
 
         balancesByAddress[from] -= amount;
@@ -125,7 +125,7 @@ contract GruntFund {
             addresses.push(to);
         }
 
-        emit ForcedTransfer(from, to, amount);
+        emit ForcedTransfer(from, to, amount, documentHash);
     }
 
     /// @notice Checks if an address already exists in the addresses array
