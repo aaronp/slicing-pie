@@ -6,4 +6,4 @@ build:
 preview: build
 	npm run preview
 docker:
-	docker build . -t kindservices/my-app-name:0.0.1
+	docker build . -t kindservices/grunt-fund:0.0.1
