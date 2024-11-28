@@ -1,7 +1,7 @@
 import { outro, select } from "npm:@clack/prompts"
 import "https://deno.land/std@0.200.0/dotenv/load.ts"
 import { about, updateSettings, listAddresses } from "./actionSettings.ts"
-import { doMint, addMinter } from "./actionMint.ts"
+import { doMint, addMinter, removeMinter } from "./actionMint.ts"
 import { transfer, forceTansfer } from "./actionTransfer.ts"
 import { listEvents } from "./actionEvents.ts"
 import { GruntFund } from "./GruntFund.ts"
@@ -20,6 +20,7 @@ export const userMenuPrompt = async (gruntFund : GruntFund, web3Settings : Web3S
       { value: 'transfer', label: 'Transfer Tokens' },
       { value: 'forceTransfer', label: 'Force Transfer Tokens' },
       { value: 'addMinter', label: 'Add a minter' },
+      { value: 'removeMinter', label: 'Remove a minter' },
       { value: 'about', label: 'About' },
       { value: 'addresses', label: 'Show addresses' },
       { value: 'quit', label: 'Quit' },
@@ -66,6 +67,10 @@ export const userMenuPrompt = async (gruntFund : GruntFund, web3Settings : Web3S
     }
     case 'addMinter': {
       await addMinter(gruntFund)
+      break
+    }
+    case 'removeMinter': {
+      await removeMinter(gruntFund)
       break
     }
     case 'addresses': {
