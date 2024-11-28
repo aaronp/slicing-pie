@@ -108,7 +108,7 @@ settings({
 		</div>
 	</svelte:fragment>
 
-	<AppBar title="my-app-name">
+	<AppBar title="Slicing Pie Grunt Fund">
 		<div slot="actions" class="flex gap-3">
 
 			<Tooltip title="Kind" placement="left" offset={2}>

@@ -4,6 +4,7 @@
   import { Button  } from "svelte-ux"
   import { onMount } from "svelte"
   import Arcs from "./Arcs.svelte"
+  import { type Section } from "./Arcs.svelte"
 
   type Props = {
     settings : Settings,
@@ -15,6 +16,30 @@
     label : string,
     address :string
     amount :number
+  }
+
+  function calculatePieChartSegments(balances : Balance[], totalAmount : number) : Section[] {
+
+    // Initialize the starting degree
+    let currentDeg = 0
+
+    // Map balances to include fromDeg and toDeg
+    return balances.map(balance => {
+      const percent = Number(balance.amount) / totalAmount
+      const degrees = percent * 360
+      const fromDeg = currentDeg
+      const toDeg = currentDeg + degrees
+
+      // Update currentDeg for the next balance
+      currentDeg = toDeg;
+
+      return {
+        label : balance.label,
+        percent,
+        fromDeg: fromDeg,
+        toDeg: toDeg,
+      };
+    });
   }
 
   const radius = 50
@@ -30,6 +55,8 @@
   let balances: Balance[] = $state([]);
 
   let total = $state(0)
+
+  let sections : Section[] = $state([])
 
   const gruntLabelByAddress = new Map<string, string>();
   let account : Result<MetaMask> = $state('init')
@@ -64,6 +91,11 @@
         total = values.reduce((a, b) => {
             return Number(a) + Number(b);
         }, 0)
+
+        if (total > 0) {
+          sections = calculatePieChartSegments(balances, total)
+        }
+        
     })
     // connectToMetaMask
     const grunts =  splitMapping(settings.grunts)
@@ -114,12 +146,10 @@
 
   <Arcs 
   radius={radius} 
-  sections={balances.map((b) => {
-    return { label : b.label, percentage : total > 0 ? b.amount / total : 1 }
-  })} 
+  sections={sections} 
   fontSize={20} 
   labelOffset={10}
-  labelGap={10}
+  labelGap={0}
   centerX={width / 2}
   centerY={height / 2}
   />

@@ -157,7 +157,7 @@ export const idFromPath = (pathname: string) => {
     }
   }
 
-const degToRad = (degrees : number) => (degrees * Math.PI) / 180
+export const degToRad = (degrees : number) => (degrees * Math.PI) / 180
 
 export const arcForIndex = (centerX : number, centerY : number, numSections :number, index :number, r : number) : ArcCoords => {
     const sectionAngle = degToRad(360 / numSections)

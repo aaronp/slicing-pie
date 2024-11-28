@@ -1,10 +1,12 @@
 <script lang="ts">
 
-  import { arcForIndex } from "$lib"
+  import { arcForIndex, degToRad } from "$lib"
 
-  type Section = {
+  export type Section = {
     label : string,
-    percentage : number
+    percent: number,
+    fromDeg : number,
+    toDeg : number
   }
   type Props = {
     radius : number,
@@ -46,11 +48,20 @@
 
 
   // Function to generate SVG arc path
-  function createArcPathForIndex(index : number) {
+  function createArcPathForIndex(index : number, section : Section) {
     if (sections.length == 1) {
       return `M ${centerX + radius},${centerY} A ${radius},${radius} 0 1,1 ${centerX - radius},${centerY} A ${radius},${radius} 0 1,1 ${centerX + radius},${centerY}`
     }
-    const { startAngle, endAngle, x1, y1, x2, y2 } = arc(index, radius)
+    // const { startAngle, endAngle, x1, y1, x2, y2 } = arc(index, radius)
+
+    const startAngle = degToRad(section.fromDeg)
+    const endAngle = degToRad(section.toDeg)
+    const r = radius
+    const x1 = centerX + r * Math.cos(startAngle)
+    const y1 = centerY + r * Math.sin(startAngle)
+    const x2 = centerX + r * Math.cos(endAngle)
+    const y2 = centerY + r * Math.sin(endAngle)
+    
 
     const largeArcFlag = endAngle - startAngle > Math.PI ? 1 : 0;
 
@@ -68,7 +79,7 @@
     
     <!-- Render the arc path for each section -->
     <path
-      d={createArcPathForIndex(index)}
+      d={createArcPathForIndex(index, section)}
       fill={`hsl(${index * 40}, 90%, 60%)`}
       fill-opacity="0.1"
       stroke="#333"
