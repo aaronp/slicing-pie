@@ -40,6 +40,10 @@ export const userMenuPrompt = async (gruntFund : GruntFund, web3Settings : Web3S
       await doMint(gruntFund)
       break
     }
+    case 'events': {
+      await listEvents(gruntFund)
+      break
+    }
     case 'transfer': {
       await transfer(gruntFund, web3Settings)
       break
@@ -71,7 +75,7 @@ export const userMenuPrompt = async (gruntFund : GruntFund, web3Settings : Web3S
     default: {
       console.error('Invalid choice ' + operationChoice)
 
-      await userMenuPrompt(gruntFund)
+      await userMenuPrompt(gruntFund, web3Settings)
     }
   }
   return true
