@@ -17,14 +17,14 @@ We've just expanded on that to add an approval step, so admins can approve those
 TODO:
  * deploy the contract via Makefile ✅ 
  * cli:
-   * 1. Add transfer, forceTransfer, removeMinter, and isAllowedMinter to the CLi
-   * 2. Create a Kind CLI w/ getAllFunds and mint functions
+   * 1. Add transfer, forceTransfer, removeMinter, and isAllowedMinter to the CLi ✅
+   * 2. Create a Kind CLI w/ getAllFunds and mint functions ⏳🙄
  * dapp: 🦕 
    * 1. Set the contract address if there isn't already one in local storage ✅ 
    * 2. Allocate pie to a grunt ✅ 
    *   2.1 keep a name/address mapping in local storage <- MVP, just have a text-area with <name>:<address> mappings ✅ 
-   * 3. list allocations and show the pie / listed allocations
-   * 4. list all contract events
+   * 3. list allocations and show the pie / listed allocations ⏳🙄
+   * 4. list all contract events ⏳🙄
 
 # Command-line User Interface
 
@@ -34,7 +34,7 @@ You can interact with the contract using a command-line interface:
 make cli
 ```
 
-However, to interact with your Metamask account in this way requires access to your SEED_PHRASE in your environment.
+However, to interact with your account in this way requires access to the private key in a settings config.
 
 A perhaps better way is to just use a web client and integrate in the browser
 
