@@ -7,11 +7,8 @@
   import { onMount } from "svelte"
   import { Button } from "svelte-ux"
 
-  let pageName : string = $derived($page.url.pathname)
-
   let settings : Settings | null = $state(null)
   let account : MetaMask | null = $state(null)
-  let isConnected = $state(false)
   let message = $state('')
   
     // Check if contractAddress exists in localStorage on component mount
@@ -22,15 +19,11 @@
       if (!settings?.kindContractAddress) {
         goto('/settings')
       } else {
-              
         const connectResult = await connectToMetaMask()
         if (typeof connectResult === 'string') {
-          isConnected = false
           message = `Error connecting: ${connectResult}`
         } else {
           account = connectResult as MetaMask
-          isConnected = true
-        }
       }
     })
 

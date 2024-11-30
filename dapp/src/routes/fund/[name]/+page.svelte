@@ -20,31 +20,25 @@
 
     let message = $state('')
     let account : MetaMask | null = $state(null)
-    let isConnected = $state(false)
 
 
-    onMount(async () => {
-        
+    onMount(async () => {        
         settings = loadSettings()
         grunts = splitMapping(settings.grunts)
         funds = splitMapping(settings.funds)
    
         const connectResult = await connectToMetaMask()
         if (typeof connectResult === 'string') {
-          isConnected = false
           message = `Error connecting: ${connectResult}`
         } else {
           account = connectResult as MetaMask
-
           gruntFund = await GruntFund.forSettings(settings.kindContractAddress, account)
-          isConnected = true
         }
-
     })
 </script>
 
 {#key id}
-
+  
     {#if message.length > 0}
         <Notification
             title="Unknown fund"
@@ -58,7 +52,7 @@
         <Fund {settings} {gruntFund} fundAddress={id} />
     {/if}
 
-    {#if settings != null && gruntFund != null }
+    {#if settings != null && gruntFund != null && account != null}
         <Balances {account} {settings} {gruntFund} fundAddress={id} />
     {/if}
 {/key}

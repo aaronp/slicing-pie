@@ -60,17 +60,17 @@ settings({
 	<svelte:fragment slot="nav">
 		<div class="grid">
 			<div class="self-start m-2 text-white">
-				<a href="/" ><Icon data={mdiHome} /><span class="p-2">Dashboard</span></a>
+				<NavItem icon={mdiHome} text="Dashboard" currentUrl={$page.url} path="/" ></NavItem>
 			</div>
 			<div class="self-start m-2 text-white">
-				<a href="/settings" ><Icon data={mdiCog} /><span class="p-2">Settings</span></a>
+				<!-- <a href="/settings" ><Icon data={mdiCog} /><span class="p-2">Settings</span></a> -->
+				<NavItem icon={mdiCog} text="Settings" currentUrl={$page.url} path="/settings" ></NavItem>
 			</div>
-			<div class="self-start m-2 text-white">
-				<a href="/allocations" ><Icon data={mdiAccount} /><span class="p-2">Allocations</span></a>
-			</div>
-
 			{#each funds as fund}
-				<NavItem text={fund.label} currentUrl={$page.url} path="/fund/{fund.address}" />
+			<div class="self-start m-2 text-white">
+				<NavItem icon={mdiAccount} text={fund.label} currentUrl={$page.url} path="/fund/{fund.address}" ></NavItem>
+			</div>
+				
 				<!-- <div class="self-start m-2 text-white">
 					<a href="/fund/{fund.address}" ><Icon data={mdiAccountCash} /><span class="p-2">{fund.label}</span></a>
 				</div> -->

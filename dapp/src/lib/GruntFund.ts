@@ -21,7 +21,11 @@ const abi = [
   "event Transfer(address indexed from, address indexed to, uint256 amount, string documentHash)",
   "event ForcedTransfer(address indexed from, address indexed to, uint256 amount, string documentHash)"
 ]
-
+export type EventData = {
+  event: string;
+  args: Array<Record<string, any>>;
+  timestamp: Date;
+}
 
 export class GruntFund {
   public contract: ethers.Contract
@@ -73,7 +77,7 @@ export class GruntFund {
   }
 
 
-  async events() {
+  async events() : Promise<EventData[]> {
     const filter = {
       address: await this.contract.getAddress(),
       fromBlock: 0,

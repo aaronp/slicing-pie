@@ -34,6 +34,7 @@
 </script>
 
 <div class="bg-gray-200 m-2 p-2" ><div class="font-bold">{fundName}</div><div class="text-sm text-opacity-50 text-blue-700">({fundAddress})</div></div>
+
 <div class="grid-cols-1 gap-2 w-1/3 bg-opacity-50 text-opacity-75">
     <div class="m-2">
         <Field label="Grunt:" >
@@ -70,10 +71,6 @@
         </TextField>
     </div>
     <div class="m-2">
-        amount={amount}
-        canMint={canMint}
-        message={message}
-        selectedGrunt={selectedGrunt}
         <Button  variant="fill" color="primary" onclick={onMint}>Mint</Button>
     </div>
 </div>

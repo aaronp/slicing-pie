@@ -1,10 +1,10 @@
 <script lang="ts">
   import { type Settings, type MetaMask, splitMapping } from "$lib"
   import { GruntFund } from "$lib/GruntFund"
-  import { Button  } from "svelte-ux"
   import { onMount } from "svelte"
   import Pie from "./Pie.svelte"
-  import { type Section } from "./Arcs.svelte"
+  import Logs from "./Logs.svelte"
+  import GruntShare from "./GruntShare.svelte"
 
   type Props = {
     settings : Settings,
@@ -19,13 +19,11 @@
     amount :number
   }
 
-  const radius = 50
-  const width = 200
-  const height = 200
+  const radius = 150
+  const width = 400
+  const height = 400
 
-  let { settings, fundAddress, account } : Props = $props()
-
-  let gruntFund : GruntFund | null = $state(null)
+  let { gruntFund, settings, fundAddress, account } : Props = $props()
 
   let allAddresses : string[] = $state([])
 
@@ -33,54 +31,60 @@
 
   let total = $state(0)
 
-  const gruntLabelByAddress = new Map<string, string>()
+  let gruntLabelByAddress = $state(new Map<string, string>())
+
+  let fundName : string = $state('')
+  let fundSymbol : string = $state('')
 
   onMount(async () => {
-    gruntFund = await GruntFund.forSettings(fundAddress, account)
-
-    allAddresses = await gruntFund!.getAllAddresses()
-
+    fundName = await gruntFund.getName()
+    fundSymbol = await gruntFund.getSymbol()
+    allAddresses = await gruntFund.getAllAddresses()
     
     const gruntsByAddress = splitMapping(settings.grunts)
+
+    const insertBalance = (balances: Balance[], newBalance: Balance): Balance[] => {
+      // Find the correct index to insert the new balance
+      let index = balances.findIndex(balance => newBalance.amount > balance.amount)
+
+      // If no larger amount is found, push to the end
+      if (index === -1) {
+        balances.push(newBalance)
+      } else {
+        balances.splice(index, 0, newBalance) // Insert at the found index
+      }
+
+      return balances
+    }
 
     const values = await Promise.all(allAddresses.map(async (address) => {
         const value = await gruntFund!.getBalance(address)        
         const amount = (typeof value === 'string') ? parseInt(value, 10) : (value as Number).valueOf()
 
         const grunt = gruntsByAddress.find((e) => e.address == address)
-        
-        console.log(`${address} is ${amount}`)
-        balances.push({
+
+        insertBalance(balances, {
             label : grunt?.label ?? address,
             address,
             amount
         })
+
         return amount
     }))
     
-    
     total = values.reduce((a, b) => {
-        return Number(a) + Number(b);
+        return Number(a) + Number(b)
     }, 0)
-        
-    // connectToMetaMask
+
+    // balances.sort((a, b) => a.amount - b.amount)
+
     const grunts =  splitMapping(settings.grunts)
     grunts.forEach(grunt => {
-        gruntLabelByAddress.set(grunt.address, grunt.label);
-    });
+        gruntLabelByAddress.set(grunt.address, grunt.label)
+    })
+    gruntLabelByAddress = new Map(gruntLabelByAddress)
 
   })
-
-  const onDebug = async () => {
-    try {
-        const found = await readAddresses()
-        alert(`found ${found.length}: ${JSON.stringify(found, null, 2)}`)
-    } catch(e) {
-        alert(`threw called on ${await gruntFund!.contract.getAddress()}:: ${e}`)
-    }
-  }
-
-  const readAddresses = async () => await gruntFund!.getAllAddresses()
 
   const labelFor = (address : string) => gruntLabelByAddress.get(address) ?? address
 
@@ -88,50 +92,38 @@
 
 <div class="bg-blue-100">
 
-<div class="text-lg">
-  Total: {total}
-  !!! gruntFund:{fundAddress}
+<div class="text-2xl ml-4 pt-4  mt-8">
+  Total:  {total} {fundSymbol}
 </div>
-
-<div>{balances.length} Grunts:</div>
-<div>{allAddresses.length} allAddresses:</div>
-
-{#each balances as b}
-<div class="m-2">
-  <span class="p-2">{labelFor(b.address)}:</span><span class="p-2">{b.amount} {100 * Number(b.amount) / total}%</span>
-</div>
-
-{/each}
-
 
 <div class="container mx-auto p-4">
-  <div class="grid gap-4 md:grid-cols-2 md:grid-rows-2">
+  <div class="grid gap-4 md:grid-flow-row md:auto-cols-auto md:justify-start ">
     <!-- Component A -->
-    <div class="bg-blue-500 text-white p-4 rounded-md">
-      <h2 class="text-lg font-bold">Component A</h2>
-      <p>
-        {#if total > 0}
-        <Pie {width} {height} {radius} {balances} {total} />
-        {/if}
-      </p>
+    <div class="bg-blue-500 text-white p-4 rounded-md w-max">
+      <h2 class="text-lg font-bold">Pie:</h2>
+      {#if total > 0}
+      <Pie {width} {height} {radius} {balances} {total} />
+      {/if}
     </div>
 
     <!-- Component B -->
-    <div class="bg-green-500 text-white p-4 rounded-md">
-      <h2 class="text-lg font-bold">Component B</h2>
-      <p>Content for component B</p>
+    <div class="bg-green-500 text-white p-4 rounded-md w-max md:justify-self-start">
+      <h2 class="text-lg font-bold">{balances.length} Grunts</h2>
+      
+      {#each balances as b}
+        <GruntShare label={labelFor(b.address)} address={b.address} amount={b.amount} share={100 * Number(b.amount) / total} />
+      {/each}
+
     </div>
 
     <!-- Component C -->
-    <div class="bg-red-500 text-white p-4 rounded-md md:col-span-2">
-      <h2 class="text-lg font-bold">Component C</h2>
-      <p>Content for component C</p>
+    <div class="bg-primary-900 text-white p-4 rounded-md md:col-span-2">
+      <h2 class="text-lg font-bold">Events</h2>
+      <Logs {gruntFund} gruntAliasByAddress={gruntLabelByAddress} />
     </div>
   </div>
 </div>
 
 
-
-<Button onclick={onDebug} >Check</Button>
 
 </div>
