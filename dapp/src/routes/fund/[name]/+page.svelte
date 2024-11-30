@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    import { type LabeledAddress, type MetaMask, type Settings, idFromPath, loadSettings, splitMapping } from "$lib"
+    import { type LabeledAddress, type MetaMask, type Settings, idFromPath, loadSettings, splitMapping, connectToMetaMask } from "$lib"
     import Fund from "$lib/Fund.svelte"
     import Balances from "$lib/Balances.svelte"
     import { GruntFund } from "$lib/GruntFund"

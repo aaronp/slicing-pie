@@ -1,6 +1,6 @@
 <script lang="ts">
 
-  import { type Result, type LabeledAddress, type Settings, idFromPath, loadSettings, connectToMetaMask, type MetaMask } from "$lib"
+  import { type LabeledAddress, type Settings, idFromPath, loadSettings, connectToMetaMask, type MetaMask } from "$lib"
   import { goto } from '$app/navigation'
   import Accounts from '../lib/Accounts.svelte'
   import { page } from '$app/stores'
@@ -8,10 +8,7 @@
   import { Button } from "svelte-ux"
 
   let pageName : string = $derived($page.url.pathname)
-  let id = $derived(idFromPath(pageName))
 
-  let grunts : LabeledAddress[] = $state([])
-  let funds : LabeledAddress[] = $state([])
   let settings : Settings | null = $state(null)
   let account : MetaMask | null = $state(null)
   let isConnected = $state(false)
