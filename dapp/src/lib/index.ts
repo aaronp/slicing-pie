@@ -1,5 +1,12 @@
 import { ethers, JsonRpcApiProvider, JsonRpcSigner } from 'ethers'
 
+export type Balance = {
+  label : string,
+  address :string
+  amount :number
+}
+
+
 export type ArcCoords = {
   sectionAngle : number,
   startAngle : number,
