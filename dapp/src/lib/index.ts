@@ -104,18 +104,6 @@ import { writable } from 'svelte/store';
   }
 }
 
-export const accountFeed = writable<Result<MetaMask>>('not connected')
-
-export const connect = async () => {
-  const c = await connectToMetaMask()
-  if (typeof c === 'string') {
-    throw new Error(c)
-  } else {
-    console.log(`updaing account feed with ${JSON.stringify(c, null, 2)}`)
-  }
-  accountFeed.set(c)
-}
-
 export type LabeledAddress = {
     label : string
     address : string

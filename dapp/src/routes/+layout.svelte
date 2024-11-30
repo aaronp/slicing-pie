@@ -15,45 +15,24 @@ import {
 	mdiWeb,
 	mdiCog,
 	mdiAccount,
-	mdiAccountCash,
 	mdiHome,
 } from '@mdi/js'
 
 import { onMount } from "svelte"
-import { type Result, type MetaMask, type LabeledAddress, type Settings, idFromPath, loadSettings, splitMapping, connect, accountFeed } from "$lib"
+import { type Result, type MetaMask, type LabeledAddress, type Settings, idFromPath, loadSettings, splitMapping, connectToMetaMask } from "$lib"
 import { page } from '$app/stores'
 import '../app.postcss'
 let appSettings : Settings | null = $state(null)
 
 
 let funds : LabeledAddress[] = $state([])
-let account : Result<MetaMask> = $state("not connected")
-let isConnected = $state(false)
-let message = $state('')
+
 // Check if contractAddress exists in localStorage on component mount
-onMount(() => {
+onMount(async () => {
 	appSettings = loadSettings()
 	funds = splitMapping(appSettings.funds)
-
-
-	accountFeed.subscribe((a) => {
-            if (typeof a === 'string') {
-              isConnected = false
-            } else {
-              isConnected = true
-            }
-            account = a
-        })
 })
 
-const onConnectAccount = async () => {
-      try {
-        await connect()
-      } catch (e) {
-        message = `${e}`
-      }
-    }
-  
 
 settings({
 	components: {
@@ -80,14 +59,6 @@ settings({
 <AppLayout>
 	<svelte:fragment slot="nav">
 		<div class="grid">
-
-			{#if (typeof account === 'string') }
-				<Button onclick={onConnectAccount} >Connect Metamask Account</Button>
-			{:else}
-				<div class="self-start m-2 text-white">
-					<Icon data={mdiAccount} /><span class="p-2 text-xs">{(account as MetaMask).signerName} ({(account as MetaMask).signerAddress})</span>
-				</div>
-			{/if}
 			<div class="self-start m-2 text-white">
 				<a href="/" ><Icon data={mdiHome} /><span class="p-2">Dashboard</span></a>
 			</div>

@@ -1,7 +1,4 @@
 <script lang="ts">
-  import { type Settings, type Result, type MetaMask, splitMapping, accountFeed } from "$lib"
-  import { GruntFund } from "$lib/GruntFund"
-  import { Button  } from "svelte-ux"
   import { onMount } from "svelte"
   import Arcs from "./Arcs.svelte"
   import { type Section } from "./Arcs.svelte"

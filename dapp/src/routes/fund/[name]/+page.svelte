@@ -1,12 +1,12 @@
 <script lang="ts">
 
-    import { type Result, type MetaMask, type LabeledAddress, type Settings, idFromPath, loadSettings, splitMapping, accountFeed, connect } from "$lib"
+    import { type LabeledAddress, type MetaMask, type Settings, idFromPath, loadSettings, splitMapping } from "$lib"
     import Fund from "$lib/Fund.svelte"
-    import Pie from "$lib/Pie.svelte"
+    import Balances from "$lib/Balances.svelte"
     import { GruntFund } from "$lib/GruntFund"
 	import { page } from '$app/stores'
     import { onMount } from "svelte"
-    import { Notification, TextField, SelectField, MenuItem, Field, Button, cls } from "svelte-ux"
+    import { Notification } from "svelte-ux"
     import {mdiAlertOctagonOutline} from '@mdi/js'
   
     let pageName : string = $derived($page.url.pathname)
@@ -19,24 +19,27 @@
     let gruntFund : GruntFund | null = $state(null)
 
     let message = $state('')
+    let account : MetaMask | null = $state(null)
+    let isConnected = $state(false)
 
-    let account : Result<MetaMask> = $state("not connected")
 
     onMount(async () => {
-        await connect()
-
+        
         settings = loadSettings()
         grunts = splitMapping(settings.grunts)
         funds = splitMapping(settings.funds)
+   
+        const connectResult = await connectToMetaMask()
+        if (typeof connectResult === 'string') {
+          isConnected = false
+          message = `Error connecting: ${connectResult}`
+        } else {
+          account = connectResult as MetaMask
 
-        gruntFund = await GruntFund.forAddress(settings.kindContractAddress)
+          gruntFund = await GruntFund.forSettings(settings.kindContractAddress, account)
+          isConnected = true
+        }
 
-        accountFeed.subscribe((a) => {
-            if (typeof a === 'string') {
-                message = a;
-            }
-            account = a
-        })
     })
 </script>
 
@@ -56,6 +59,6 @@
     {/if}
 
     {#if settings != null && gruntFund != null }
-        <Pie {settings} {gruntFund} fundAddress={id} />
+        <Balances {account} {settings} {gruntFund} fundAddress={id} />
     {/if}
 {/key}
