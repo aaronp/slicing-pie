@@ -90,16 +90,16 @@
 
 </script>
 
-<div class="bg-blue-100">
 
 <div class="text-2xl ml-4 pt-4  mt-8">
   Total:  {total} {fundSymbol}
 </div>
 
+
 <div class="container mx-auto p-4">
-  <div class="grid gap-4 md:grid-flow-row md:auto-cols-auto md:justify-start ">
+  <div class="grid gap-4 md:grid-cols-[1fr auto auto] md:grid-rows-2">
     <!-- Component A -->
-    <div class="bg-blue-500 text-white p-4 rounded-md w-max">
+    <div class="bg-blue-500 text-white p-4 rounded-md">
       <h2 class="text-lg font-bold">Pie:</h2>
       {#if total > 0}
       <Pie {width} {height} {radius} {balances} {total} />
@@ -107,7 +107,7 @@
     </div>
 
     <!-- Component B -->
-    <div class="bg-green-500 text-white p-4 rounded-md w-max md:justify-self-start">
+    <div class="bg-green-500 text-white p-4 rounded-md">
       <h2 class="text-lg font-bold">{balances.length} Grunts</h2>
       
       {#each balances as b}
@@ -117,13 +117,14 @@
     </div>
 
     <!-- Component C -->
-    <div class="bg-primary-900 text-white p-4 rounded-md md:col-span-2">
+    <div class="text-white p-4 rounded-md">
+      <!-- spacer -->
+    </div>
+
+    <!-- Component D -->
+    <div class="bg-yellow-500 text-white p-4 rounded-md md:col-span-3">
       <h2 class="text-lg font-bold">Events</h2>
       <Logs {gruntFund} gruntAliasByAddress={gruntLabelByAddress} />
     </div>
   </div>
-</div>
-
-
-
 </div>

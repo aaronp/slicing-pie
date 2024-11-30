@@ -35,7 +35,8 @@
           gruntFund = await GruntFund.forSettings(settings.kindContractAddress, account)
         }
     })
-</script>
+  </script>
+  
 
 {#key id}
   
