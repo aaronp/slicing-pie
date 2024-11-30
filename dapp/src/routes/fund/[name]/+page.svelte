@@ -1,7 +1,7 @@
 <script lang="ts">
 
     import { type LabeledAddress, type MetaMask, type Settings, idFromPath, loadSettings, splitMapping, connectToMetaMask } from "$lib"
-    import Fund from "$lib/Fund.svelte"
+    import Fund from "$lib/Mint.svelte"
     import Balances from "$lib/Balances.svelte"
     import { GruntFund } from "$lib/GruntFund"
 	import { page } from '$app/stores'
@@ -49,8 +49,6 @@
             {message}
             closeIcon
         />
-    {:else if settings != null && gruntFund != null }
-        <Fund {settings} {gruntFund} fundAddress={id} />
     {/if}
 
     {#if settings != null && gruntFund != null && account != null}

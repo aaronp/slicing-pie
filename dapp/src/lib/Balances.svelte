@@ -4,6 +4,8 @@
   import { onMount } from "svelte"
   import Pie from "./Pie.svelte"
   import Logs from "./Logs.svelte"
+  import Mint from "./Mint.svelte"
+  import { Toggle, Button, Dialog } from "svelte-ux"
   import GruntShare from "./GruntShare.svelte"
 
   type Props = {
@@ -97,7 +99,7 @@
 
 
 <div class="container mx-auto p-4">
-  <div class="grid gap-4 md:grid-cols-[1fr auto auto] md:grid-rows-2">
+  <div class="grid gap-4 md:grid-cols-[1fr auto 3fr] md:grid-rows-[auto 10px auto]">
     <!-- Component A -->
     <div class="bg-blue-500 text-white p-4 rounded-md">
       <h2 class="text-lg font-bold">Pie:</h2>
@@ -119,6 +121,23 @@
     <!-- Component C -->
     <div class="text-white p-4 rounded-md">
       <!-- spacer -->
+    </div>
+
+
+    <!-- Spacer Row -->
+    <div class="col-span-3" >
+      <Toggle let:on={open} let:toggle let:toggleOff>
+        <Button variant="fill" color="primary" onclick={toggle}>Show Dialog</Button>
+        <Dialog {open} onclose={toggleOff}>
+          <div slot="title">Allocate Funds</div>
+          <div>
+            <Mint {settings} {gruntFund} {fundAddress} />
+          </div>
+          <div slot="actions">
+            <Button variant="fill" color="primary">Close</Button>
+          </div>
+        </Dialog>
+      </Toggle>
     </div>
 
     <!-- Component D -->
