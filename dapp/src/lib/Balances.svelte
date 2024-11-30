@@ -5,6 +5,7 @@
   import Pie from "./Pie.svelte"
   import Logs from "./Logs.svelte"
   import Mint from "./Mint.svelte"
+  import BalanceTable from "./BalanceTable.svelte"
   import { Toggle, Button, Dialog } from "svelte-ux"
   import GruntShare from "./GruntShare.svelte"
 
@@ -15,7 +16,7 @@
     account : MetaMask
   }
   
-  type Balance = {
+  export type Balance = {
     label : string,
     address :string
     amount :number
@@ -93,7 +94,7 @@
 </script>
 
 
-<div class="text-2xl ml-4 pt-4  mt-8">
+<div class="text-2xl ml-4  mt-2">
   Total:  {total} {fundSymbol}
 </div>
 
@@ -108,13 +109,14 @@
       {/if}
     </div>
 
-    <!-- Component B -->
-    <div class="bg-green-500 text-white p-4 rounded-md">
+    <!-- Component B bg-green-100  -->
+    <div class="text-primary p-4 rounded-md">
       <h2 class="text-lg font-bold">{balances.length} Grunts</h2>
       
-      {#each balances as b}
+      <BalanceTable {gruntFund} {balances} {total} />
+      <!-- {#each balances as b}
         <GruntShare label={labelFor(b.address)} address={b.address} amount={b.amount} share={100 * Number(b.amount) / total} />
-      {/each}
+      {/each} -->
 
     </div>
 

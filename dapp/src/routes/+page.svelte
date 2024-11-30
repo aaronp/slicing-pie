@@ -24,6 +24,7 @@
           message = `Error connecting: ${connectResult}`
         } else {
           account = connectResult as MetaMask
+        }
       }
     })
 
