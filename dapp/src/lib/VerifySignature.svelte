@@ -1,12 +1,21 @@
-<script>
-    import { writable } from "svelte/store";
-    import { ethers } from "ethers";
+<script lang="ts">
+  import { type MetaMask } from "$lib"
+  import { Button } from "svelte-ux"
+  import { sha256 } from "ethers"
+  import { ethers } from "ethers"
+
+
+  type Props = {
+    account : MetaMask 
+  }
   
-    let unsignedDocumentHash = ""; // The SHA-256 hash of the document (unsigned)
-    let signedHash = ""; // The hash signed by the signer
-    let signerAddress = ""; // The expected public address of the signer
-    let verificationResult = null; // Stores the verification result
-    let verifying = false;
+  let { account } : Props = $props()
+  
+    let unsignedDocumentHash = $state("") // The SHA-256 hash of the document (unsigned)
+    let signedHash = $state("") // The hash signed by the signer
+    let signerAddress = $state("") // The expected public address of the signer
+    let verificationResult = $state(null) // Stores the verification result
+    let verifying = $state(false)
   
     const verifySignature = async () => {
       try {
@@ -20,7 +29,7 @@
         }
   
         // Reconstruct the signed message from the signed hash
-        const recoveredAddress = ethers.utils.verifyMessage(unsignedDocumentHash, signedHash);
+        const recoveredAddress = ethers.verifyMessage(unsignedDocumentHash, signedHash);
   
         // Compare the recovered address with the provided address
         verificationResult = recoveredAddress.toLowerCase() === signerAddress.toLowerCase()

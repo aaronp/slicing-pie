@@ -1,12 +1,12 @@
 <script lang="ts">
-    import { type MetaMask, type Settings, loadSettings, connectToMetaMask } from "$lib"
+    import { type MetaMask } from "$lib"
     import { Button } from "svelte-ux"
-    import { ethers } from "ethers"
-    import { sha256 } from "@ethersproject/sha2"
-  
+    import { sha256 } from "ethers"
+
     let droppedFile = $state(null)
     let dropTimestamp = $state(null)
     let documentHash = $state("")
+    let signature = $state('')
     let signing = $state(false)
   
     type Props = {
@@ -22,12 +22,15 @@
         const signer = account.signer
         if (signer) {
           
-          const fileContent = await readFileAsBase64(droppedFile)
-          
-          alert(`tpe of fileContent is ${typeof fileContent}: ${fileContent}`)
+          // const fileContent = await readFileAsBase64(droppedFile)
+          const fileContent = await readFileAsByteArray(droppedFile)
+          // 
+          // alert(`tpe of fileContent is ${typeof fileContent}: ${fileContent}`)
+          // message = fileContent
+          // const bytes = toUtf8Bytes(fileContent)
           documentHash = sha256(fileContent)
-          alert(`sha256 is ${typeof documentHash}: ${documentHash}`)
-          const signature = await signer.signMessage(documentHash)
+          
+          signature = await signer.signMessage(documentHash)
           console.log("Signature:", signature)
           signing = false
         }
@@ -37,10 +40,10 @@
       }
     }
   
-    const copyToClipboard = () => {
-      if (documentHash) {
-        navigator.clipboard.writeText(documentHash)
-        alert("Hash copied to clipboard!")
+    const copyToClipboard = (text : string) => {
+      if (text) {
+        navigator.clipboard.writeText(text)
+        alert(`${text} copied to clipboard!`)
       }
     }
   
@@ -58,29 +61,27 @@
       event.preventDefault()
     }
   
-    const readFileAsBase64 = (file) : Promise<string> => {
+    const readFileAsByteArray = (file) => {
       return new Promise((resolve, reject) => {
-        const reader = new FileReader()
+        const reader = new FileReader();
+
+        // Handle successful file read
         reader.onload = () => {
-          const r = reader.result
-          let result = r as string | ArrayBuffer | null
-          if (typeof result === 'string') {
-            resolve(result)
-          } else if (result instanceof ArrayBuffer) {
-            const reader = new FileReader()
-            reader.onload = () => {
-              resolve(reader.result as string)
-            }
-            reader.readAsDataURL(new Blob([result]))
-          } else {
-            reject('Invalid file type')
-          }
-        }
-        reader.onerror = () => reject(reader.result)
-        reader.onerror = reject
-        reader.readAsDataURL(file) // Encodes the file as Base64
-      })
+          const arrayBuffer = reader.result; // ArrayBuffer
+          const byteArray = new Uint8Array(arrayBuffer); // Convert to byte array
+          resolve(byteArray);
+        };
+
+        // Handle file read errors
+        reader.onerror = () => {
+          reject(new Error("Failed to read file as byte array"));
+        };
+
+        // Read the file as an ArrayBuffer
+        reader.readAsArrayBuffer(file);
+      });
     }
+
   </script>
   
   <div class="flex flex-col items-center space-y-4">
@@ -117,10 +118,28 @@
             <div class="text-xs text-gray-800 break-all">{documentHash}</div>
             <Button
               class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-              on:click={copyToClipboard}
+              onclick={() => copyToClipboard(documentHash)}
             >
               Copy to Clipboard
             </Button>
+          </div>
+        {/if}
+
+        {#if signature}
+          <div class="flex flex-col items-center space-y-2">
+            <div class="text-sm text-gray-700">Signature:</div>
+            <div class="text-xs text-gray-800 break-all">{signature}</div>
+            <Button
+              class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              onclick={() => copyToClipboard(signature)}
+            >
+              Copy to Clipboard
+            </Button>
+          </div>
+
+          <div class="flex flex-col items-center space-y-2">
+            <div class="text-sm text-gray-700">Signed by:</div>
+            <div class="text-xs text-gray-800 break-all">{account.signerAddress}</div>
           </div>
         {/if}
       </div>
