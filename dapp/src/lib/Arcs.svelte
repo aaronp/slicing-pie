@@ -34,21 +34,35 @@
   }
 
 
-  function textFlipTransform(index :number) {
-    const { startAngle, endAngle } = arc(index, labelRadius)
+  function textFlipTransform(index :number, section : Section) {
+    // const { startAngle, endAngle } = arc(index, labelRadius)
+    const startAngle = degToRad(section.fromDeg)
+    const endAngle = degToRad(section.toDeg)
+    // const r = radius
+    // const x1 = centerX + r * Math.cos(startAngle)
+    // const y1 = centerY + r * Math.sin(startAngle)
+    // const x2 = centerX + r * Math.cos(endAngle)
+    // const y2 = centerY + r * Math.sin(endAngle)
     const isBottomHalf = (startAngle + endAngle) / 2 > Math.PI  
     return isBottomHalf ? `rotate(90)` : ""
   }
 
-  function createLabelPathForIndex(index :number) {
-    const { x1, y1, x2, y2 } = arc(index, labelRadius)
+  function createLabelPathForSection(index :number, section : Section) {
+    // const { x1, y1, x2, y2 } = arc(index, labelRadius)
+    const startAngle = degToRad(section.fromDeg)
+    const endAngle = degToRad(section.toDeg)
+    const r = radius
+    const x1 = centerX + r * Math.cos(startAngle)
+    const y1 = centerY + r * Math.sin(startAngle)
+    const x2 = centerX + r * Math.cos(endAngle)
+    const y2 = centerY + r * Math.sin(endAngle)
 
     return `M ${x1},${y1} A ${labelRadius},${labelRadius} 0 0 1 ${x2},${y2}`;
   }
 
 
   // Function to generate SVG arc path
-  function createArcPathForIndex(index : number, section : Section) {
+  function createArcPathForSection(section : Section) {
     if (sections.length == 1) {
       return `M ${centerX + radius},${centerY} A ${radius},${radius} 0 1,1 ${centerX - radius},${centerY} A ${radius},${radius} 0 1,1 ${centerX + radius},${centerY}`
     }
@@ -79,7 +93,7 @@
     
     <!-- Render the arc path for each section -->
     <path
-      d={createArcPathForIndex(index, section)}
+      d={createArcPathForSection(section)}
       fill={`hsl(${index * 40}, 90%, 60%)`}
       fill-opacity="0.1"
       stroke="#333"
@@ -90,14 +104,14 @@
       <!-- Define path for the label text -->
       <path
       id="label-path-{index}"
-      d={createLabelPathForIndex(index)}
+      d={createLabelPathForSection(index, section)}
       fill="none"
       stroke="none"
     />
 
     <!-- Render the label centered along the arc -->
     <text class="label" font-size={fontSize}>
-      <textPath href={`#label-path-${index}`} startOffset="50%" text-anchor="middle" dominant-baseline="middle" transform={textFlipTransform(index)}>
+      <textPath href={`#label-path-${index}`} startOffset="50%" text-anchor="middle" dominant-baseline="middle" transform={textFlipTransform(index, section)}>
         {section.label}
       </textPath>
     </text>

@@ -1,7 +1,6 @@
 <script lang="ts">
 
-    import { type LabeledAddress, type MetaMask, type Settings, idFromPath, loadSettings, splitMapping, connectToMetaMask } from "$lib"
-    import Fund from "$lib/Mint.svelte"
+    import { type MetaMask, type Settings, idFromPath, loadSettings, connectToMetaMask } from "$lib"
     import Balances from "$lib/Balances.svelte"
     import { GruntFund } from "$lib/GruntFund"
 	import { page } from '$app/stores'
@@ -12,20 +11,15 @@
     let pageName : string = $derived($page.url.pathname)
 	let id = $derived(idFromPath(pageName))
 
-    let grunts : LabeledAddress[] = $state([])
-    let funds : LabeledAddress[] = $state([])
-    let settings : Settings | null = $state(null)
-
-    let gruntFund : GruntFund | null = $state(null)
-
     let message = $state('')
+    
+    let settings : Settings | null = $state(null)
     let account : MetaMask | null = $state(null)
+    let gruntFund : GruntFund | null = $state(null)
 
 
     onMount(async () => {        
         settings = loadSettings()
-        grunts = splitMapping(settings.grunts)
-        funds = splitMapping(settings.funds)
    
         const connectResult = await connectToMetaMask()
         if (typeof connectResult === 'string') {
