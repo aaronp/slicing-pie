@@ -2,6 +2,8 @@
     import { type MetaMask } from "$lib"
     import { Button } from "svelte-ux"
     import { sha256 } from "ethers"
+    import JSZip from "jszip"
+
 
     let droppedFile = $state(null)
     let dropTimestamp = $state(null)
@@ -33,6 +35,8 @@
           signature = await signer.signMessage(documentHash)
           console.log("Signature:", signature)
           signing = false
+
+          await createAndDownloadZip(droppedFile, signature, documentHash)
         }
       } catch (error) {
         console.error("Error signing document:", error)
@@ -40,6 +44,47 @@
       }
     }
   
+
+    async function createAndDownloadZip(droppedFile, signature, documentHash) {
+      try {
+        const zip = new JSZip()
+        
+
+        // Add the original file
+        const originalFileContent = await readFileAsByteArray(droppedFile)
+        zip.file(droppedFile.name, originalFileContent)
+
+        const metadata = {
+          documentHash,
+          signature,
+          publicKey : account.signerAddress,
+          timestamp : (new Date()).toISOString()
+        }
+
+        // Add the signature file
+        zip.file("metadata.json", JSON.stringify(metadata, null, 2))
+
+
+        // Add the hash file
+        const strippedName = droppedFile.name.replace(/\./g, '_')
+
+        // Generate the ZIP file as a Blob
+        const zipBlob = await zip.generateAsync({ type: "blob" })
+
+        // Trigger the download
+        const link = document.createElement("a")
+        link.href = URL.createObjectURL(zipBlob)
+        link.download = `${strippedName}.zip`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+
+        console.log("ZIP file created and download initiated.");
+      } catch (error) {
+        console.error("Error creating ZIP file:", error);
+      }
+    }
+
     const copyToClipboard = (text : string) => {
       if (text) {
         navigator.clipboard.writeText(text)
@@ -117,7 +162,7 @@
             <div class="text-sm text-gray-700">Document Hash:</div>
             <div class="text-xs text-gray-800 break-all">{documentHash}</div>
             <Button
-              class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-green-600"
               onclick={() => copyToClipboard(documentHash)}
             >
               Copy to Clipboard
