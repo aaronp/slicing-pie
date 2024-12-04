@@ -85,7 +85,6 @@
     grunts.forEach(grunt => {
         gruntLabelByAddress.set(grunt.address, grunt.label)
     })
-    gruntLabelByAddress = new Map(gruntLabelByAddress)
 
   })
 

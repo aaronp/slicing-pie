@@ -7,9 +7,10 @@
     import { goto } from "$app/navigation"
     import VerifySignature from "$lib/VerifySignature.svelte"
     import Mint from "$lib/Mint.svelte"
+    import ZipExtractor from "$lib/ZipExtractor.svelte";
 
     let pageName : string = $derived($page.url.pathname)
-	let id = $derived(idFromPath(pageName, 1))
+	let fundAddress = $derived(idFromPath(pageName, 1))
 
     let message = $state('')
 
@@ -25,20 +26,27 @@
           message = `Error connecting: ${connectResult}`
         } else {
           account = connectResult as MetaMask
-          gruntFund = await GruntFund.forSettings(id, account)
+          gruntFund = await GruntFund.forSettings(fundAddress, account)
         }
     })
 </script>
 
 <div class="m-2"><Button variant="outline" color="secondary" onclick={() => goto(`${$page.url.pathname.split('/').slice(0, -1).join('/')}`)}>Back</Button></div>
-<div class="text-center">
+
+
+
     {message}
     <p class="text-secondary text-bold text-xl m-8">Verify the signed documents:</p>
-    {#if account}
-        <VerifySignature {account} />
+    {#if account && settings && gruntFund}
 
-        <Mint {settings} {gruntFund} fundAddress={id} />
+        <ZipExtractor {settings} {account} {fundAddress} />
+        <!-- <VerifySignature {account} /> -->
+
+
+    <div class="text-center">
+        <Mint {settings} {gruntFund} {fundAddress} />
+    </div>
+    
     {:else}
         <p>Account is not connected</p>
     {/if}
-</div>

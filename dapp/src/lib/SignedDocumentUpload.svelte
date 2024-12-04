@@ -13,13 +13,15 @@
       fundAddress : string
     }
 
+    let { account, fundAddress } : Props = $props()
+
     type SignedDocLink = {
       href : string,
       fileName : string
     }
     
     let signedDocLink : SignedDocLink | null = $state(null)
-    let { account, fundAddress } : Props = $props()
+
     let message = $state('')
   
     const signDocument = async () => {
@@ -31,7 +33,9 @@
           // const fileContent = await readFileAsBase64(droppedFile)
           const fileContent = await readFileAsByteArray(droppedFile)
 
-          const [metadata, signedUpload] = await signDoc(droppedFile.name, fundAddress, account, fileContent)
+          const impliedFundAmount = 123 // TODO - insert fund calculator to work out resulting PIE
+          
+          const [metadata, signedUpload] = await signDoc(droppedFile.name, fundAddress, impliedFundAmount, account, fileContent)
 
           return await createAndDownloadZip(droppedFile, metadata, signedUpload)
         }
@@ -119,6 +123,7 @@
   </script>
   
   <div class="flex flex-col items-center space-y-4">
+    {message}
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
       class="w-full max-w-md p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200 transition duration-200"

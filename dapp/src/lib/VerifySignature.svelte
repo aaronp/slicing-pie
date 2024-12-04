@@ -1,7 +1,5 @@
 <script lang="ts">
   import { type MetaMask } from "$lib"
-  import { Button } from "svelte-ux"
-  import { sha256 } from "ethers"
   import { ethers } from "ethers"
 
 

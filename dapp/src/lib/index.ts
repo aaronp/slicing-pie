@@ -110,6 +110,14 @@ export type LabeledAddress = {
 }
 
 // takes a text block and sparates the lines into key:value pairs
+export const splitByAddress = (content : string) => {
+  let map = new Map<string, string>()
+  const grunts =  splitMapping(content)
+  grunts.forEach(grunt => {
+      map.set(grunt.address, grunt.label)
+  })
+  return map
+}
 export const splitMapping = (content : string) : LabeledAddress[] => {
     return content.split('\n')
         .map(line => line.trim())
