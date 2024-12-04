@@ -1,7 +1,7 @@
 <script lang="ts">
     import { type MetaMask } from "$lib"
     import { Button } from "svelte-ux"
-    import { sha256 } from "ethers"
+    import { id, sha256, toUtf8Bytes } from "ethers"
     import JSZip from "jszip"
 
 
@@ -11,11 +11,20 @@
     let signature = $state('')
     let signing = $state(false)
   
+    type UploadMetadata = {
+      fundAddress : string,
+      publicKey : string,
+      timestamp  : string
+    }
+
     type Props = {
-      account : MetaMask 
+      account : MetaMask,
+      fundAddress : string
     }
     
-    let { account } : Props = $props()
+    let { account, fundAddress } : Props = $props()
+
+    const formatMetadata = (md : UploadMetadata) => JSON.stringify(md, null, 2)
   
     const signDocument = async () => {
       if (!droppedFile) return
@@ -31,21 +40,35 @@
           // message = fileContent
           // const bytes = toUtf8Bytes(fileContent)
           documentHash = sha256(fileContent)
+
+          const metadata = uploadMetadata()
+          const metadataContent = formatMetadata(metadata)
           
-          signature = await signer.signMessage(documentHash)
-          console.log("Signature:", signature)
+          const metadataHash = sha256(toUtf8Bytes(metadataContent))
+          const hash = sha256(toUtf8Bytes(documentHash + metadataHash))
+          
+          signature = await signer.signMessage(hash)
+
           signing = false
 
-          await createAndDownloadZip(droppedFile, signature, documentHash)
+          await createAndDownloadZip(droppedFile, metadata, hash)
         }
       } catch (error) {
         console.error("Error signing document:", error)
         signing = false
       }
     }
+
+    const uploadMetadata = () : UploadMetadata => {
+      return {
+          fundAddress,
+          publicKey : account.signerAddress,
+          timestamp : (new Date()).toISOString()
+        }
+    }
   
 
-    async function createAndDownloadZip(droppedFile, signature, documentHash) {
+    async function createAndDownloadZip(droppedFile, metadata : UploadMetadata, hash: string) {
       try {
         const zip = new JSZip()
         
@@ -54,15 +77,13 @@
         const originalFileContent = await readFileAsByteArray(droppedFile)
         zip.file(droppedFile.name, originalFileContent)
 
-        const metadata = {
-          documentHash,
-          signature,
-          publicKey : account.signerAddress,
-          timestamp : (new Date()).toISOString()
-        }
 
         // Add the signature file
-        zip.file("metadata.json", JSON.stringify(metadata, null, 2))
+        zip.file("metadata.json", formatMetadata(metadata))
+        zip.file("signature.json", JSON.stringify({
+          hash,
+          signature,
+        }, null, 2))
 
 
         // Add the hash file
@@ -136,9 +157,15 @@
       ondrop={handleDrop}
       ondragover={handleDragOver}
     >
+    {#if droppedFile}
+      <p class="text-center text-gray-500 drop-target">
+        Dropped {droppedFile.name}
+      </p>
+    {:else}
       <p class="text-center text-gray-500">
         Drag and drop your document here, or click to upload.
       </p>
+    {/if}
     </div>
   
     {#if dropTimestamp}
@@ -194,6 +221,10 @@
   <style>
     .drop-area {
       transition: background-color 0.3s ease
+    }
+
+    .drop-target {
+      cursor: pointer;
     }
   
     .drop-area:hover {

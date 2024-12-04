@@ -8,7 +8,7 @@
     import { goto } from "$app/navigation"
 
     let pageName : string = $derived($page.url.pathname)
-	let id = $derived(idFromPath(pageName, 1))
+	let fundAddress = $derived(idFromPath(pageName, 1))
 
     let message = $state('')
 
@@ -24,7 +24,7 @@
           message = `Error connecting: ${connectResult}`
         } else {
           account = connectResult as MetaMask
-          gruntFund = await GruntFund.forSettings(id, account)
+          gruntFund = await GruntFund.forSettings(fundAddress, account)
         }
     })
 </script>
@@ -34,7 +34,7 @@
     {message}
     <p class="text-secondary text-bold text-xl m-8">Upload the document (timesheet, fund transfer, etc):</p>
     {#if account}
-        <SignedDocumentUpload {account} />
+        <SignedDocumentUpload {account} {fundAddress} />
     {:else}
         <p>Account is not connected</p>
     {/if}
