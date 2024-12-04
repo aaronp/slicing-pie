@@ -7,7 +7,6 @@ import {
 	settings,
 	ThemeInit,
 	ThemeSelect,
-	Icon,
 	NavItem
 } from 'svelte-ux'
 
@@ -19,7 +18,7 @@ import {
 } from '@mdi/js'
 
 import { onMount } from "svelte"
-import { type Result, type MetaMask, type LabeledAddress, type Settings, idFromPath, loadSettings, splitMapping, connectToMetaMask } from "$lib"
+import { type Result, type MetaMask, type LabeledAddress, type Settings, loadSettings, splitMapping, connectToMetaMask } from "$lib"
 import { page } from '$app/stores'
 import '../app.postcss'
 let appSettings : Settings | null = $state(null)

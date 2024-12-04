@@ -142,12 +142,12 @@ export const loadSettings = () : Settings => {
 export const saveSettings = (s : Settings) => localStorage.setItem('grunt-settings', JSON.stringify(s))
 
 
-export const idFromPath = (pathname: string) => {
+export const idFromPath = (pathname: string, pathIndexFromEnd : number) => {
     const parts = pathname.split('/').filter((p) => p.length > 0)
     if (parts.length < 2) {
       return ''
     } else {
-      const id = parts[parts.length - 1] ?? ''
+      const id = parts[parts.length - 1 - pathIndexFromEnd] ?? ''
       return id
     }
   }

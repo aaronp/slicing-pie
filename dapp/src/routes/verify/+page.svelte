@@ -4,7 +4,7 @@
     import { GruntFund } from "$lib/GruntFund"
 	import { page } from '$app/stores'
     import { onMount } from "svelte"
-    import VerifySignature from "$lib/VerifySignature.svelte";
+    import VerifySignature from "$lib/VerifySignature.svelte"
 
 
     let message = $state('')

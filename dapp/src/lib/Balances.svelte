@@ -1,13 +1,15 @@
 <script lang="ts">
+    import { goto } from "$app/navigation";
+
   import { type Settings, type MetaMask, splitMapping } from "$lib"
   import { GruntFund } from "$lib/GruntFund"
   import { onMount } from "svelte"
   import Pie from "./Pie.svelte"
-  import Logs from "./Logs.svelte"
   import Mint from "./Mint.svelte"
   import BalanceTable from "./BalanceTable.svelte"
   import { Toggle, Button, Dialog } from "svelte-ux"
-  import GruntShare from "./GruntShare.svelte"
+  import { page } from '$app/stores'
+  
 
   type Props = {
     settings : Settings,
@@ -79,8 +81,6 @@
         return Number(a) + Number(b)
     }, 0)
 
-    // balances.sort((a, b) => a.amount - b.amount)
-
     const grunts =  splitMapping(settings.grunts)
     grunts.forEach(grunt => {
         gruntLabelByAddress.set(grunt.address, grunt.label)
@@ -89,7 +89,9 @@
 
   })
 
-  const labelFor = (address : string) => gruntLabelByAddress.get(address) ?? address
+const onUploadDocs = () => goto(`${$page.url}/allocate`)
+const onMint = () => goto(`${$page.url}/mint`)
+const onEvents = () => goto(`${$page.url}/logs`)
 
 </script>
 
@@ -114,9 +116,6 @@
       <h2 class="text-lg font-bold">{balances.length} Grunts</h2>
       
       <BalanceTable {gruntFund} {balances} {total} />
-      <!-- {#each balances as b}
-        <GruntShare label={labelFor(b.address)} address={b.address} amount={b.amount} share={100 * Number(b.amount) / total} />
-      {/each} -->
 
     </div>
 
@@ -129,7 +128,15 @@
     <!-- Spacer Row -->
     <div class="col-span-3" >
       <Toggle let:on={open} let:toggle let:toggleOff>
-        <Button variant="fill" color="primary" onclick={toggle}>Show Dialog</Button>
+        <!-- <Button variant="fill" color="primary" onclick={toggle}>Mint</Button> -->
+        <Button variant="fill" color="primary" onclick={onUploadDocs}>Submit Docs</Button>
+        <Button variant="outline" color="secondary" onclick={onMint}>Mint</Button>
+        <Button variant="outline" color="secondary" onclick={onEvents}>Events</Button>
+
+        <!--
+        <span ><a class="text-blue-500 hover:text-blue-700 underline hover:underline-offset-4 focus:outline-none focus:ring focus:ring-blue-300 transition-all duration-200" href="{$page.url}/logs">Logs</a></span>
+        -->
+        
         <Dialog {open} onclose={toggleOff}>
           <div slot="title">Allocate Funds</div>
           <div>
@@ -143,9 +150,9 @@
     </div>
 
     <!-- Component D -->
-    <div class="bg-yellow-500 text-white p-4 rounded-md md:col-span-3">
+    <!-- <div class="bg-yellow-500 text-white p-4 rounded-md md:col-span-3">
       <h2 class="text-lg font-bold">Events</h2>
       <Logs {gruntFund} gruntAliasByAddress={gruntLabelByAddress} />
-    </div>
+    </div> -->
   </div>
 </div>

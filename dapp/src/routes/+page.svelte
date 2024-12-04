@@ -1,12 +1,11 @@
 <script lang="ts">
 
-  import { type LabeledAddress, type Settings, idFromPath, loadSettings, connectToMetaMask, type MetaMask } from "$lib"
+  import { type LabeledAddress, type Settings, loadSettings, connectToMetaMask, type MetaMask } from "$lib"
   import { goto } from '$app/navigation'
   import Accounts from '../lib/Accounts.svelte'
-  import { page } from '$app/stores'
   import { onMount } from "svelte"
   import { Button } from "svelte-ux"
-
+  
   let settings : Settings | null = $state(null)
   let account : MetaMask | null = $state(null)
   let message = $state('')

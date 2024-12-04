@@ -61,7 +61,7 @@
         <div class="-mt-0.5 mb-10 mx-2">
           <time class="font-mono italic">{item.date}</time>
           <div class="text-lg font-black">{item.title}</div>
-          <div class="text-surface-content/70 text-sm text-white">
+          <div class="text-surface-content/70 text-sm text-secondary">
             {item.description}
           </div>
         </div>
