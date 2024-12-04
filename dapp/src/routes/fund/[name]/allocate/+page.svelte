@@ -12,19 +12,15 @@
 
     let message = $state('')
 
-    let settings : Settings | null = $state(null)
     let account : MetaMask | null = $state(null)
-    let gruntFund : GruntFund | null = $state(null)
 
-    onMount(async () => {        
-        settings = loadSettings()
+    onMount(async () => {
    
         const connectResult = await connectToMetaMask()
         if (typeof connectResult === 'string') {
           message = `Error connecting: ${connectResult}`
         } else {
           account = connectResult as MetaMask
-          gruntFund = await GruntFund.forSettings(fundAddress, account)
         }
     })
 </script>

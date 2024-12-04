@@ -38,7 +38,7 @@
 
 
 {#if typeof account !== 'string'}
-    logged in as {(account as MetaMask).signerName} ({(account as MetaMask).signerAddress})
+    logged in as {(account as MetaMask)?.signerName} ({(account as MetaMask)?.signerAddress})
 {/if}
 
 

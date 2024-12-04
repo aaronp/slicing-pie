@@ -1,90 +1,56 @@
 <script lang="ts">
+    import type { BytesLike } from "ethers"
+
     import { type MetaMask } from "$lib"
-    import { Button } from "svelte-ux"
-    import { id, sha256, toUtf8Bytes } from "ethers"
+    import { type UploadMetadata, type SignedUpload, signDoc } from "./docsign"
     import JSZip from "jszip"
 
 
     let droppedFile = $state(null)
-    let dropTimestamp = $state(null)
-    let documentHash = $state("")
-    let signature = $state('')
-    let signing = $state(false)
   
-    type UploadMetadata = {
-      fundAddress : string,
-      publicKey : string,
-      timestamp  : string
-    }
-
     type Props = {
       account : MetaMask,
       fundAddress : string
     }
-    
-    let { account, fundAddress } : Props = $props()
 
-    const formatMetadata = (md : UploadMetadata) => JSON.stringify(md, null, 2)
+    type SignedDocLink = {
+      href : string,
+      fileName : string
+    }
+    
+    let signedDocLink : SignedDocLink | null = $state(null)
+    let { account, fundAddress } : Props = $props()
+    let message = $state('')
   
     const signDocument = async () => {
       if (!droppedFile) return
       try {
-        signing = true
         const signer = account.signer
         if (signer) {
-          
+
           // const fileContent = await readFileAsBase64(droppedFile)
           const fileContent = await readFileAsByteArray(droppedFile)
-          // 
-          // alert(`tpe of fileContent is ${typeof fileContent}: ${fileContent}`)
-          // message = fileContent
-          // const bytes = toUtf8Bytes(fileContent)
-          documentHash = sha256(fileContent)
 
-          const metadata = uploadMetadata()
-          const metadataContent = formatMetadata(metadata)
-          
-          const metadataHash = sha256(toUtf8Bytes(metadataContent))
-          const hash = sha256(toUtf8Bytes(documentHash + metadataHash))
-          
-          signature = await signer.signMessage(hash)
+          const [metadata, signedUpload] = await signDoc(droppedFile.name, fundAddress, account, fileContent)
 
-          signing = false
-
-          await createAndDownloadZip(droppedFile, metadata, hash)
+          return await createAndDownloadZip(droppedFile, metadata, signedUpload)
         }
       } catch (error) {
         console.error("Error signing document:", error)
-        signing = false
       }
     }
 
-    const uploadMetadata = () : UploadMetadata => {
-      return {
-          fundAddress,
-          publicKey : account.signerAddress,
-          timestamp : (new Date()).toISOString()
-        }
-    }
-  
-
-    async function createAndDownloadZip(droppedFile, metadata : UploadMetadata, hash: string) {
+    async function createAndDownloadZip(droppedFile, metadata : UploadMetadata, signedUpload : SignedUpload) {
       try {
         const zip = new JSZip()
         
-
         // Add the original file
         const originalFileContent = await readFileAsByteArray(droppedFile)
         zip.file(droppedFile.name, originalFileContent)
 
-
         // Add the signature file
-        zip.file("metadata.json", formatMetadata(metadata))
-        zip.file("signature.json", JSON.stringify({
-          hash,
-          signature,
-        }, null, 2))
-
+        zip.file("metadata.json", JSON.stringify(metadata, null, 2))
+        zip.file("signature.json", JSON.stringify(signedUpload, null, 2))
 
         // Add the hash file
         const strippedName = droppedFile.name.replace(/\./g, '_')
@@ -93,59 +59,61 @@
         const zipBlob = await zip.generateAsync({ type: "blob" })
 
         // Trigger the download
-        const link = document.createElement("a")
-        link.href = URL.createObjectURL(zipBlob)
-        link.download = `${strippedName}.zip`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
+        // const link = document.createElement("a")
+        // link.href = URL.createObjectURL(zipBlob)
+        // link.download = `${strippedName}.zip`
+        signedDocLink = {
+          href : URL.createObjectURL(zipBlob),
+          fileName : `${strippedName}.zip`
+        }
 
-        console.log("ZIP file created and download initiated.");
+        // document.body.appendChild(link)
+        // link.click()
+        // document.body.removeChild(link)
+
       } catch (error) {
-        console.error("Error creating ZIP file:", error);
+        message = `Error creating ZIP file: ${error}`
       }
     }
 
-    const copyToClipboard = (text : string) => {
-      if (text) {
-        navigator.clipboard.writeText(text)
-        alert(`${text} copied to clipboard!`)
-      }
-    }
+    // const copyToClipboard = (text : string) => {
+    //   if (text) {
+    //     navigator.clipboard.writeText(text)
+    //     alert(`${text} copied to clipboard!`)
+    //   }
+    // }
   
     const handleDrop = async (event) => {
       event.preventDefault()
       const file = event.dataTransfer.files[0]
       if (file) {
         droppedFile = file
-        dropTimestamp = new Date().toLocaleString()
-        documentHash = null // Reset hash if a new file is dropped
+
+        await signDocument()
       }
     }
   
-    const handleDragOver = (event) => {
-      event.preventDefault()
-    }
+    const handleDragOver = (event) => event.preventDefault()
   
-    const readFileAsByteArray = (file) => {
+    const readFileAsByteArray = (file) : Promise<BytesLike> => {
       return new Promise((resolve, reject) => {
-        const reader = new FileReader();
+        const reader = new FileReader()
 
         // Handle successful file read
         reader.onload = () => {
-          const arrayBuffer = reader.result; // ArrayBuffer
-          const byteArray = new Uint8Array(arrayBuffer); // Convert to byte array
-          resolve(byteArray);
-        };
+          const arrayBuffer = reader.result // ArrayBuffer
+          const byteArray = new Uint8Array(arrayBuffer) // Convert to byte array
+          resolve(byteArray)
+        }
 
         // Handle file read errors
         reader.onerror = () => {
           reject(new Error("Failed to read file as byte array"));
-        };
+        }
 
         // Read the file as an ArrayBuffer
-        reader.readAsArrayBuffer(file);
-      });
+        reader.readAsArrayBuffer(file)
+      })
     }
 
   </script>
@@ -168,53 +136,11 @@
     {/if}
     </div>
   
-    {#if dropTimestamp}
-      <div class="text-sm text-gray-700">
-        File dropped at: {dropTimestamp}
-      </div>
-    {/if}
-  
-    {#if droppedFile}
-      <div class="flex flex-col items-center space-y-2">
-        <Button
-          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          on:click={signDocument}
-          disabled={signing}
-        >
-          {signing ? "Signing..." : "Sign Document"}
-        </Button>
-  
-        {#if documentHash}
-          <div class="flex flex-col items-center space-y-2">
-            <div class="text-sm text-gray-700">Document Hash:</div>
-            <div class="text-xs text-gray-800 break-all">{documentHash}</div>
-            <Button
-              class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-green-600"
-              onclick={() => copyToClipboard(documentHash)}
-            >
-              Copy to Clipboard
-            </Button>
-          </div>
-        {/if}
-
-        {#if signature}
-          <div class="flex flex-col items-center space-y-2">
-            <div class="text-sm text-gray-700">Signature:</div>
-            <div class="text-xs text-gray-800 break-all">{signature}</div>
-            <Button
-              class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-              onclick={() => copyToClipboard(signature)}
-            >
-              Copy to Clipboard
-            </Button>
-          </div>
-
-          <div class="flex flex-col items-center space-y-2">
-            <div class="text-sm text-gray-700">Signed by:</div>
-            <div class="text-xs text-gray-800 break-all">{account.signerAddress}</div>
-          </div>
-        {/if}
-      </div>
+    {#if signedDocLink}
+    <div class="bg-blue m-2 p-2">
+      <a class="text-blue-500 hover:text-blue-700 underline hover:underline-offset-4 focus:outline-none focus:ring focus:ring-blue-300 transition-all duration-200" 
+        href={signedDocLink.href} download={signedDocLink.fileName} >{signedDocLink.fileName}</a>
+    </div>
     {/if}
   </div>
   
