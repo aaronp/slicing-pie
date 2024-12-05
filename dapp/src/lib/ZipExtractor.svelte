@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Icon, Steps, Step } from 'svelte-ux'
+  import { Notification, Icon, Steps, Step, toTitleCase } from 'svelte-ux'
   import type { SignedUpload, UploadMetadata} from './docsign'
   import { validateDoc } from './docsign'
 
@@ -8,8 +8,8 @@
     mdiListBoxOutline,
     mdiCreditCardOutline,
     mdiTruckDeliveryOutline,
-	mdiCheckCircle,
-  mdiCross
+    mdiAlertOctagonOutline,
+  mdiCheckCircleOutline
 } from '@mdi/js'
 
   import { splitByAddress, type MetaMask, type Settings } from '$lib';
@@ -116,13 +116,25 @@
         
 
         {#if error}
-          <Step point="!" classes={{ point: "bg-danger text-danger-content" }} >{error}</Step>
+        <div class="grid gap-2 w-[400px]">
+          <Notification
+            title={toTitleCase(error)}
+            icon={mdiAlertOctagonOutline}
+            danger
+            closeIcon
+          />
+        </div>
         {/if}
         
         {#if signatureIsValid}
-          <Step completed classes={{ completed: "bg-success text-success-content" }} >Signature Matches</Step>
-        {:else}
-          <Step point="!" classes={{ point: "bg-danger text-danger-content" }} >Signature does not match</Step>
+          <div class="w-[400px]">
+            <Notification
+              title="Successfully Saved!"
+              icon={mdiCheckCircleOutline}
+              color="success"
+              closeIcon
+            />
+          </div>
         {/if}
         
       </Steps>

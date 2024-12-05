@@ -32,7 +32,7 @@ const uploadHash = (fileContent : BytesLike, metadata : UploadMetadata) => sha25
  * @returns true if the signature matches the hash of the fileContent and metadata. 
  * @throws If the hash of the content and metadata don't match the original hash computed and saved in the uploadMetadata, which indicates the file contents or metadata have been tampered with
  */
-export const   = async (uploadMetadata : UploadMetadata, signature : SignedUpload, fileContent : BytesLike) => {
+export const valiateDoc  = async (uploadMetadata : UploadMetadata, signature : SignedUpload, fileContent : BytesLike) => {
   const unsignedHash = uploadHash(fileContent, uploadMetadata)
 
   // Reconstruct the signed message from the signed hash
