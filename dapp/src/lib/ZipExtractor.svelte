@@ -39,6 +39,7 @@
   // the symbol which we retrieve from the chain
   let fundSymbol = $state("")
 
+  let uploadLink : DocLink | null = $state(null)
   let docLink : DocLink | null = $state(null)
 
   onMount(async() => {
@@ -88,6 +89,10 @@
       const fileContentBuffer : ArrayBuffer = await uploadFile.async('arraybuffer')
       const fileContent = new Uint8Array(fileContentBuffer)
 
+      uploadLink = {
+        href : URL.createObjectURL(new Blob([zipFile])),
+        fileName : zipFile.name
+      }
       docLink = {
         href : URL.createObjectURL(new Blob([fileContentBuffer])),
         fileName : uploadMetadata.fileName
@@ -175,7 +180,7 @@
         </Tooltip>
       </div>
       {/if}
-
+      
     </div>
   {/if}
   
@@ -187,5 +192,14 @@
   </div>
 
   {#if isValid}
-    <p class="text-red-300"><Icon class="my-4 mr-4" data={mdiAlert}/>Note: be sure to upload this document to permanent store.</p>
+    <p class="text-red-300"><Icon class="my-4 mr-4" data={mdiAlert}/>Note: be sure to upload {#if uploadLink}
+      <span class="bg-blue mt-2 pt-2">
+        <a class="text-blue-500 hover:text-blue-700 underline hover:underline-offset-4 focus:outline-none focus:ring focus:ring-blue-300 transition-all duration-200" 
+          href={uploadLink.href} download={uploadLink.fileName} >the uploaded document</a>
+      </span>
+      {:else}
+      this document
+      {/if} to permanent store.</p>
+
+    
   {/if}

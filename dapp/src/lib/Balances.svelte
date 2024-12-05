@@ -5,9 +5,8 @@
   import { GruntFund } from "$lib/GruntFund"
   import { onMount } from "svelte"
   import Pie from "./Pie.svelte"
-  import Mint from "./Mint.svelte"
   import BalanceTable from "./BalanceTable.svelte"
-  import { Toggle, Button, Dialog } from "svelte-ux"
+  import { Toggle, Button, Dialog, Tooltip } from "svelte-ux"
   import { page } from '$app/stores'
   
 
@@ -35,6 +34,8 @@
   let balances: Balance[] = $state([]);
 
   let total = $state(0)
+  let isApprover = $state(false)
+  let approveTooltip = $derived(isApprover ? 'Approve submitted allocation requests' : 'Only approvers have this option')
 
   let gruntLabelByAddress = $state(new Map<string, string>())
 
@@ -48,19 +49,22 @@
     
     const gruntsByAddress = splitMapping(settings.grunts)
 
-    const insertBalance = (balances: Balance[], newBalance: Balance): Balance[] => {
+    const insertBalance = (balanceArray: Balance[], newBalance: Balance): Balance[] => {
       // Find the correct index to insert the new balance
-      let index = balances.findIndex(balance => newBalance.amount > balance.amount)
+      let index = balanceArray.findIndex(balance => newBalance.amount > balance.amount)
 
       // If no larger amount is found, push to the end
       if (index === -1) {
-        balances.push(newBalance)
+        balanceArray.push(newBalance)
       } else {
-        balances.splice(index, 0, newBalance) // Insert at the found index
+        balanceArray.splice(index, 0, newBalance) // Insert at the found index
       }
 
-      return balances
+      return balanceArray
     }
+
+    // reset
+    balances = []
 
     const values = await Promise.all(allAddresses.map(async (address) => {
         const value = await gruntFund!.getBalance(address)        
@@ -80,6 +84,10 @@
     total = values.reduce((a, b) => {
         return Number(a) + Number(b)
     }, 0)
+
+    const ia = await gruntFund.isAllowedMinter(account.signerAddress)
+    console.log(`${account.signerAddress} is approver: ${ia}`)
+    isApprover = ia
 
     const grunts =  splitMapping(settings.grunts)
     grunts.forEach(grunt => {
@@ -126,26 +134,13 @@ const onEvents = () => goto(`${$page.url}/logs`)
 
     <!-- Spacer Row -->
     <div class="col-span-3" >
-      <Toggle let:on={open} let:toggle let:toggleOff>
-        <!-- <Button variant="fill" color="primary" onclick={toggle}>Mint</Button> -->
-        <Button variant="fill" color="primary" onclick={onUploadDocs}>Submit Docs</Button>
-        <Button variant="outline" color="secondary" onclick={onMint}>Mint</Button>
-        <Button variant="outline" color="secondary" onclick={onEvents}>Events</Button>
+      <Button variant="fill" color="primary" onclick={onUploadDocs}>Submit Docs</Button>
 
-        <!--
-        <span ><a class="text-blue-500 hover:text-blue-700 underline hover:underline-offset-4 focus:outline-none focus:ring focus:ring-blue-300 transition-all duration-200" href="{$page.url}/logs">Logs</a></span>
-        -->
-        
-        <Dialog {open} onclose={toggleOff}>
-          <div slot="title">Allocate Funds</div>
-          <div>
-            <Mint {settings} {gruntFund} {fundAddress} />
-          </div>
-          <div slot="actions">
-            <Button variant="fill" color="primary">Close</Button>
-          </div>
-        </Dialog>
-      </Toggle>
+      <Tooltip title={approveTooltip}>
+        <Button disabled={!isApprover} variant="outline" color="secondary" onclick={onMint}>Approve</Button>
+      </Tooltip>
+      
+      <Button variant="outline" color="secondary" onclick={onEvents}>Events</Button>
     </div>
 
     <!-- Component D -->
