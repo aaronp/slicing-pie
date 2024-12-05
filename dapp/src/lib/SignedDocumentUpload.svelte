@@ -2,7 +2,7 @@
     import type { BytesLike } from "ethers"
 
     import { type MetaMask } from "$lib"
-    import { type UploadMetadata, type SignedUpload, signDoc } from "./docsign"
+    import { type UploadMetadata, type SignedUpload, type DocLink, signDoc } from "./docsign"
     import JSZip from "jszip"
 
 
@@ -15,12 +15,7 @@
 
     let { account, fundAddress } : Props = $props()
 
-    type SignedDocLink = {
-      href : string,
-      fileName : string
-    }
-    
-    let signedDocLink : SignedDocLink | null = $state(null)
+    let signedDocLink : DocLink | null = $state(null)
 
     let message = $state('')
   
@@ -34,7 +29,7 @@
           const fileContent = await readFileAsByteArray(droppedFile)
 
           const impliedFundAmount = 123 // TODO - insert fund calculator to work out resulting PIE
-          
+
           const [metadata, signedUpload] = await signDoc(droppedFile.name, fundAddress, impliedFundAmount, account, fileContent)
 
           return await createAndDownloadZip(droppedFile, metadata, signedUpload)

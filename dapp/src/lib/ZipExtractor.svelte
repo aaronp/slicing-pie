@@ -1,8 +1,10 @@
 <script lang="ts">
+    import { onMount } from 'svelte';
+
     import { GruntFund } from './GruntFund';
 
   import { Notification, Icon, Tooltip, toTitleCase } from 'svelte-ux'
-  import type { SignedUpload, UploadMetadata} from './docsign'
+  import type { DocLink, SignedUpload, UploadMetadata} from './docsign'
   import { validateDoc } from './docsign'
 
   import {
@@ -31,6 +33,15 @@
   let signatureIsValid = $state(false)
   let error = $state("")
 
+  // the symbol which we retrieve from the chain
+  let fundSymbol = $state("")
+
+  let docLink : DocLink | null = $state(null)
+
+  onMount(async() => {
+    fundSymbol = await gruntFund.getSymbol()
+  })
+
   const handleFileDrop = async (event) => {
     event.preventDefault()
     error = ""
@@ -39,17 +50,24 @@
 
     const files = event.dataTransfer.files
     if (files.length !== 1 || files[0].type !== 'application/zip') {
-      error = 'Please drop a valid .zip file.'
+      error = 'Please drop a valid zip file.'
       return
     }
 
     const zipFile = files[0]
     try {
       const zip = await JSZip.loadAsync(zipFile)
+
+
+      // we make assumptions on the zip (that it was created from our SignedDocumentUpload), which has
+      // specific entries we look for.
+      //
+      // these files, BTW, are indented to be stored securely off-chain, ideally with access controls as the file contents
+      // may be sensitive
+
       const metadataFile = zip.file('metadata.json')
       const signatureFile = zip.file('signature.json')
       
-
       if (!metadataFile || !signatureFile) {
         error = 'The zip file must contain metadata.json and signature.json.'
         return
@@ -66,16 +84,21 @@
 
       const fileContentBuffer : ArrayBuffer = await uploadFile.async('arraybuffer')
       const fileContent = new Uint8Array(fileContentBuffer)
+
+      docLink = {
+          href : URL.createObjectURL(new Blob([fileContentBuffer])),
+          fileName : uploadMetadata.fileName
+        }
+
       try {
         signatureIsValid = await validateDoc(uploadMetadata, signatureUpload, fileContent)
       } catch (e) {
-        error = `${e}`
+        error = `Error validating the doc: ${e}`
         return
       }
 
     } catch (err) {
-      error = 'Failed to extract files from the zip. Please ensure it is valid.'
-      console.error(err)
+      error = `Failed to extract files from the zip: ${err}`
     }
   }
 
@@ -95,23 +118,32 @@
     <p class="text-sm text-gray-400">(Must contain metadata.json and signature.json)</p>
   </div>
   
+  {#if error}
+    <div class="grid gap-2 w-[400px]">
+      <Notification
+        title={toTitleCase(error)}
+        icon={mdiAlertOctagonOutline}
+        color="danger"
+        danger
+        closeIcon
+      />
+    </div>
+  {/if}
+
   {#if uploadMetadata && signatureUpload}
     
     <div class="mt-4">
-      <p class="text-lg"><Tooltip title={uploadMetadata.publicKey}>{gruntName(uploadMetadata.publicKey)}</Tooltip> requesting {uploadMetadata.impliedFundAmount} {await gruntFund.getSymbol()}</p>
-      <p class="">It was created at {uploadMetadata.timestamp}</p>
+      <p class="text-lg"><Tooltip title={uploadMetadata.publicKey}>"{toTitleCase(gruntName(uploadMetadata.publicKey))}"</Tooltip> requesting {uploadMetadata.impliedFundAmount} {fundSymbol}</p>
+      <p class="">Their request was created at {uploadMetadata.timestamp}</p>
       
-      {#if error}
-      <div class="grid gap-2 w-[400px]">
-        <Notification
-          title={toTitleCase(error)}
-          icon={mdiAlertOctagonOutline}
-          danger
-          closeIcon
-        />
+      {#if docLink}
+      <div class="bg-blue mt-2 pt-2">
+        Uploaded doc:
+        <a class="text-blue-500 hover:text-blue-700 underline hover:underline-offset-4 focus:outline-none focus:ring focus:ring-blue-300 transition-all duration-200" 
+          href={docLink.href} download={docLink.fileName} >{docLink.fileName}</a>
       </div>
       {/if}
-      
+
       {#if signatureIsValid}
         <div class="w-[400px]">
           <Notification

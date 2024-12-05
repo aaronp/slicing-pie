@@ -16,6 +16,12 @@ export type SignedUpload = {
     signature : string
 }
 
+export type DocLink = {
+  href : string,
+  fileName : string
+}
+
+
 const metadataHash = (metadata : UploadMetadata) => {
   const metadataContent = JSON.stringify(metadata, null, 2)
   return sha256(toUtf8Bytes(metadataContent))
