@@ -116,19 +116,25 @@
 
   const handleDragOver = (event) => event.preventDefault()
 
-  const mintToHoldingFund = () => {
+  const mintToHoldingFund = async () => {
     try {
-        const addreses = await gruntFund?.mintForKindFund(settings.kindContractAddress, uploadMetadata.publicKey, uploadMetadata.impliedFundAmount, signatureUpload.signature)
-        console.log(`submitted ${JSON.stringify(addreses)}`)
+        const response = await gruntFund?.mintForKindFund(settings.kindContractAddress, uploadMetadata.publicKey, uploadMetadata.impliedFundAmount, signatureUpload.signature)
+        console.log(`submitted ${JSON.stringify(response)}`)
+        return response
     } catch(e) {
         error = `Error minting token: ${e}`
     }
   }
 
-  const mintToGruntFund = () => {
+  const mintToGruntFund = async () => {
+    if (!uploadMetadata || !signatureUpload) {
+      throw new Error("Bug: uploadMetadata or signatureUpload is null")
+    }
+
     try {
-        const addreses = await gruntFund?.mint(uploadMetadata.publicKey, uploadMetadata.impliedFundAmount, signatureUpload.signature)
-        console.log(`submitted ${JSON.stringify(addreses)}`)
+        const response = await gruntFund?.mint(uploadMetadata.publicKey, uploadMetadata.impliedFundAmount, signatureUpload.signature)
+        console.log(`submitted ${JSON.stringify(response)}`)
+        return response
     } catch(e) {
         error = `Error minting token: ${e}`
     }
@@ -140,9 +146,11 @@
     }
 
     if (useHoldingFund) {
-      await mintToHoldingFund()
+      const response = await mintToHoldingFund()
+      console.log(`mint to kind got ${JSON.stringify(response, null, 2)}`)
     } else {
-      await mintToGruntFund()
+      const response = await mintToGruntFund()
+      console.log(`mint to grunt fund got ${JSON.stringify(response, null, 2)}`)
     }
   }
 </script>

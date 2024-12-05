@@ -9,13 +9,12 @@
 	import { page } from '$app/stores'
   
     let pageName : string = $derived($page.url.pathname)
-	let id = $derived(idFromPath(pageName, 0))
+	let fundAddress = $derived(idFromPath(pageName, 0))
 
     let message = $state('')
     
     let settings : Settings | null = $state(null)
     let account : MetaMask | null = $state(null)
-    let gruntFund : GruntFund | null = $state(null)
 
     onMount(async () => {        
         settings = loadSettings()
@@ -25,12 +24,9 @@
           message = `Error connecting: ${connectResult}`
         } else {
           account = connectResult as MetaMask
-          gruntFund = await GruntFund.forSettings(id, account)
         }
     })
   </script>
-  
-{#key id}
   
     {#if message.length > 0}
         <Notification
@@ -43,7 +39,9 @@
         />
     {/if}
 
-    {#if settings != null && gruntFund != null && account != null}
-        <Balances {account} {settings} {gruntFund} fundAddress={id} />
+{#key fundAddress}
+id is {fundAddress}
+    {#if settings != null && account != null}
+        <Balances {account} {settings} {fundAddress} />
     {/if}
 {/key}

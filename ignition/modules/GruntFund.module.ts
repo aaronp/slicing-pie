@@ -1,21 +1,26 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
-import { getAddress } from 'ethers'
+const { vars } = require("hardhat/config")
+
 
 const GruntFundModule = buildModule("GruntFundModule", (m) => {
-  const fundName = m.getParameter("name", "Default Grunt Fund")
-  const fundSymbol = m.getParameter("symbol", "DGF")
-  const owner = m.getParameter("owner", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+
+  console.log('getting name')
+  const fundName = vars.get("NAME")
+  console.log('got ', fundName)
+  const fundSymbol = vars.get("SYMBOL")
+  const owner = vars.get("OWNER", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+
+  // const fundName = m.getParameter("name", "Default Grunt Fund")
+  // const fundSymbol = m.getParameter("symbol", "DGF")
+  // const owner = m.getParameter("owner", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
   const fund = m.contract("GruntFund", [fundName, fundSymbol, owner],
     {
-        from : '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+        from : owner
         // from : '0x72A828e687d92b485C9e4827FDF21D94B10769D6'
       }
   );
 
-  // const lock = m.contract("GruntFund", [fundName, fundSymbol, requiredApprovals], {
-  //   from : '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955'
-  // });
   return { fund }
 });
 

@@ -1,18 +1,17 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
+  import { goto } from "$app/navigation";
 
   import { type Settings, type MetaMask, splitMapping } from "$lib"
   import { GruntFund } from "$lib/GruntFund"
   import { onMount } from "svelte"
   import Pie from "./Pie.svelte"
   import BalanceTable from "./BalanceTable.svelte"
-  import { Toggle, Button, Dialog, Tooltip } from "svelte-ux"
+  import { Button, Tooltip } from "svelte-ux"
   import { page } from '$app/stores'
   
 
   type Props = {
     settings : Settings,
-    gruntFund : GruntFund,
     fundAddress : string,
     account : MetaMask
   }
@@ -27,7 +26,9 @@
   const width = 400
   const height = 400
 
-  let { gruntFund, settings, fundAddress, account } : Props = $props()
+  let gruntFund : GruntFund | null = $state(null)
+
+  let { settings, fundAddress, account } : Props = $props()
 
   let allAddresses : string[] = $state([])
 
@@ -43,6 +44,8 @@
   let fundSymbol : string = $state('')
 
   onMount(async () => {
+    gruntFund = await GruntFund.forSettings(fundAddress, account)
+
     fundName = await gruntFund.getName()
     fundSymbol = await gruntFund.getSymbol()
     allAddresses = await gruntFund.getAllAddresses()

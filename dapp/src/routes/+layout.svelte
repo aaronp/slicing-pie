@@ -15,6 +15,11 @@ import {
 	mdiCog,
 	mdiAccount,
 	mdiHome,
+	mdiLaunch,
+	mdiGroup,
+
+    mdiCurrencyMnt
+
 } from '@mdi/js'
 
 import { onMount } from "svelte"
@@ -65,14 +70,19 @@ settings({
 				<!-- <a href="/settings" ><Icon data={mdiCog} /><span class="p-2">Settings</span></a> -->
 				<NavItem icon={mdiCog} text="Settings" currentUrl={$page.url} path="/settings" ></NavItem>
 			</div>
+
+			<div class="self-start m-2 text-white">
+				<NavItem icon={mdiLaunch} text="Create Fund" currentUrl={$page.url} path="/deploy" ></NavItem>
+			</div>
+
+			<div class="self-start m-2 text-white">
+				<NavItem icon={mdiGroup} text="Create Group Fund" currentUrl={$page.url} path="/deploy" ></NavItem>
+			</div>
+
 			{#each funds as fund}
 			<div class="self-start m-2 text-white">
-				<NavItem icon={mdiAccount} text={fund.label} currentUrl={$page.url} path="/fund/{fund.address}" ></NavItem>
+				<NavItem icon={mdiCurrencyMnt} text={fund.label} currentUrl={$page.url} path="/fund/{fund.address}" ></NavItem>
 			</div>
-				
-				<!-- <div class="self-start m-2 text-white">
-					<a href="/fund/{fund.address}" ><Icon data={mdiAccountCash} /><span class="p-2">{fund.label}</span></a>
-				</div> -->
 			{/each}
 
 		</div>

@@ -5,26 +5,16 @@ This project creates a grunt fund (see [slicingpie.com](https://slicingpie.com/)
 That is, it tracks grunts' contribution into a start-up in order to ensure a fair equity split for founders.
 (where a 'grunt' is anybody who's contributing to a project)
 
-# The Contract
-[The smart-contract](./contracts/GruntFund.sol) is an ERC20 smart contract written in solidity.
+# The Contracts
+There is an [ERC-777 smart-contract](./contracts/GruntFund.sol) which can mint tokens with data (the hash of a signed document representing a reference to why the funds are being minted).
 
-It's nearly the most basic Grunt Fund you can create - simply allocating (minting) pie for each Grunt account.
+These contracts also maintain a whitelist for which accounts are allowed to mint tokens.
 
-We've just expanded on that to add an approval step, so admins can approve those allocations.
+Beyond these 'grunt fund' contracts, there is also [an orcheestration contract](./contracts/KindFund.sol).
 
-# Roadmap
+The idea is that there is a holding-company 'Grunt Fund' which shares resources (and thus earns equity) in incubator child Grunt Funds.
 
-TODO:
- * deploy the contract via Makefile ✅ 
- * cli:
-   * 1. Add transfer, forceTransfer, removeMinter, and isAllowedMinter to the CLi ✅
-   * 2. Create a Kind CLI w/ getAllFunds and mint functions ⏳🙄
- * dapp: 🦕 
-   * 1. Set the contract address if there isn't already one in local storage ✅ 
-   * 2. Allocate pie to a grunt ✅ 
-   *   2.1 keep a name/address mapping in local storage <- MVP, just have a text-area with <name>:<address> mappings ✅ 
-   * 3. list allocations and show the pie / listed allocations ⏳🙄
-   * 4. list all contract events ⏳🙄
+The Kind Fund exposes a `mint` function which will correctly mint tokens into the holding company fund, and the holding company fund will in turn get tokens in the child fund.
 
 # Command-line User Interface
 

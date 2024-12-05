@@ -10,11 +10,11 @@ coverage: test
 	npx hardhat coverage
 # see https://hardhat.org/hardhat-runner/docs/guides/deploying
 deployGruntFund: 
-	npx hardhat ignition deploy ./ignition/modules/GruntFund.module.ts --parameters ignition/fund1Params.json --network localhost
+	npx hardhat ignition deploy ./ignition/modules/GruntFund.module.ts --network localhost
 deployKindFund: 
-	npx hardhat ignition deploy ./ignition/modules/GruntFund.module.ts --parameters ignition/kindParams.json --network localhost
+	npx hardhat ignition deploy ./ignition/modules/GruntFund.module.ts --parameters ./ignition/kindParams.json --network localhost
 deployKind: coverage
-	npx hardhat ignition deploy ./ignition/modules/KindFund.module.ts --parameters ignition/kindGroup.json --network localhost
+	npx hardhat ignition deploy ./ignition/modules/KindFund.module.ts --parameters ./ignition/kindGroup.json --network localhost
 deploy: 
 	npx hardhat run scripts/deploy.ts
 # will run a network at http://127.0.0.1:8545
