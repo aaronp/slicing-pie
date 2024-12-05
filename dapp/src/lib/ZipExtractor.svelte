@@ -118,7 +118,7 @@
 
     try {
         const addreses = await gruntFund?.mint(uploadMetadata.publicKey, uploadMetadata.impliedFundAmount, signatureUpload.signature)
-        alert(JSON.stringify(addreses))
+        console.log(`submitted ${JSON.stringify(addreses)}`)
     } catch(e) {
         error = `Error minting token: ${e}`
     }
@@ -154,7 +154,7 @@
     {#if signatureIsValid}
     <div class="w-[400px] mt-4 mb-4">
       <Notification
-        title="the document id valid"
+        title="The document is valid"
         description="The file {uploadMetadata.fileName} has been signed by {gruntName(uploadMetadata.publicKey)} at {uploadMetadata.timestamp}"
         icon={mdiCheckCircleOutline}
         color="success"

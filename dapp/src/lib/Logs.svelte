@@ -26,7 +26,7 @@
         if (e.event == "Allocated") {
             icon = mdiCheckCircle
             const name = gruntAliasByAddress.get(e.args.recipient) ?? e.args.recipient
-            description = `gave ${name} ${e.args.amount} ${gruntSymbol}`
+            description = `gave ${name} ${e.args.amount} ${gruntSymbol}\ndoc: ${e.args.documentHash}`
         } else if (e.event == "Transfer") {
             const from = gruntAliasByAddress.get(e.args.from) ?? e.args.from
             const to = gruntAliasByAddress.get(e.args.to) ?? e.args.to

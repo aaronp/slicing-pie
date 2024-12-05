@@ -57,30 +57,15 @@
         // Generate the ZIP file as a Blob
         const zipBlob = await zip.generateAsync({ type: "blob" })
 
-        // Trigger the download
-        // const link = document.createElement("a")
-        // link.href = URL.createObjectURL(zipBlob)
-        // link.download = `${strippedName}.zip`
         signedDocLink = {
           href : URL.createObjectURL(zipBlob),
           fileName : `${signedUpload.signature}-${strippedName}.zip`
         }
 
-        // document.body.appendChild(link)
-        // link.click()
-        // document.body.removeChild(link)
-
       } catch (error) {
         message = `Error creating ZIP file: ${error}`
       }
     }
-
-    // const copyToClipboard = (text : string) => {
-    //   if (text) {
-    //     navigator.clipboard.writeText(text)
-    //     alert(`${text} copied to clipboard!`)
-    //   }
-    // }
   
     const handleDrop = async (event) => {
       event.preventDefault()
