@@ -1,16 +1,16 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+  import { onMount } from 'svelte';
 
-    import { GruntFund } from './GruntFund';
+  import { GruntFund } from './GruntFund';
 
-  import { Notification, Icon, Tooltip, toTitleCase } from 'svelte-ux'
+  import { Notification, Button, Tooltip, toTitleCase } from 'svelte-ux'
   import type { DocLink, SignedUpload, UploadMetadata} from './docsign'
   import { validateDoc } from './docsign'
 
   import {
     mdiAlertOctagonOutline,
-  mdiCheckCircleOutline
-} from '@mdi/js'
+    mdiCheckCircleOutline
+  } from '@mdi/js'
 
   import { splitByAddress, type MetaMask, type Settings } from '$lib';
   import JSZip from 'jszip'
@@ -20,10 +20,11 @@
     settings : Settings,
     account : MetaMask,
     gruntFund : GruntFund,
-    fundAddress : string
+    fundAddress : string,
+    onBack : () => void
   }
 
-  let { settings, account, gruntFund, fundAddress } : Props = $props()
+  let { settings, account, gruntFund, fundAddress, onBack } : Props = $props()
 
   let gruntsByAddress = splitByAddress(settings.grunts)
   let fundsByAddress = splitByAddress(settings.funds)
@@ -86,9 +87,9 @@
       const fileContent = new Uint8Array(fileContentBuffer)
 
       docLink = {
-          href : URL.createObjectURL(new Blob([fileContentBuffer])),
-          fileName : uploadMetadata.fileName
-        }
+        href : URL.createObjectURL(new Blob([fileContentBuffer])),
+        fileName : uploadMetadata.fileName
+      }
 
       try {
         signatureIsValid = await validateDoc(uploadMetadata, signatureUpload, fileContent)
@@ -138,9 +139,11 @@
       
       {#if docLink}
       <div class="bg-blue mt-2 pt-2">
-        Uploaded doc:
-        <a class="text-blue-500 hover:text-blue-700 underline hover:underline-offset-4 focus:outline-none focus:ring focus:ring-blue-300 transition-all duration-200" 
+        Uploaded file:
+        <Tooltip title="document hash: {signatureUpload.hash}\nsignature: {signatureUpload.signature}">
+          <a class="text-blue-500 hover:text-blue-700 underline hover:underline-offset-4 focus:outline-none focus:ring focus:ring-blue-300 transition-all duration-200" 
           href={docLink.href} download={docLink.fileName} >{docLink.fileName}</a>
+        </Tooltip>
       </div>
       {/if}
 
@@ -158,4 +161,4 @@
     </div>
   {/if}
   
-  
+  <div class="m-2"><Button variant="outline" color="secondary" onclick={onBack}>Back</Button></div>

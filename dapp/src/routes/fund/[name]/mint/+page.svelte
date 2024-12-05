@@ -3,10 +3,7 @@
     import { GruntFund } from "$lib/GruntFund"
 	import { page } from '$app/stores'
     import { onMount } from "svelte"
-    import { Button } from 'svelte-ux'
     import { goto } from "$app/navigation"
-    import VerifySignature from "$lib/VerifySignature.svelte"
-    import Mint from "$lib/Mint.svelte"
     import ZipExtractor from "$lib/ZipExtractor.svelte";
 
     let pageName : string = $derived($page.url.pathname)
@@ -29,23 +26,17 @@
           gruntFund = await GruntFund.forSettings(fundAddress, account)
         }
     })
+
+    const onBack = () => goto(`${$page.url.pathname.split('/').slice(0, -1).join('/')}` )
+    
 </script>
 
-<div class="m-2"><Button variant="outline" color="secondary" onclick={() => goto(`${$page.url.pathname.split('/').slice(0, -1).join('/')}`)}>Back</Button></div>
 
+{message}
+{#if account && settings && gruntFund}
 
+    <ZipExtractor {settings} {account} {fundAddress} {gruntFund} {onBack}/>
 
-    {message}
-    <p class="text-secondary text-bold text-xl m-8">Verify the signed documents:</p>
-    {#if account && settings && gruntFund}
-
-        <ZipExtractor {settings} {account} {fundAddress} {gruntFund} />
-
-
-    <!-- <div class="text-center">
-        <Mint {settings} {gruntFund} {fundAddress} />
-    </div> -->
-    
-    {:else}
-        <p>Account is not connected</p>
-    {/if}
+{:else}
+    <p>Account is not connected</p>
+{/if}
