@@ -12,6 +12,7 @@
     // Sync the writable store with localStorage
     gruntAddresses.subscribe(value => {
         settings.grunts = value
+        settings.kindContractAddress
         onSave()
     })
 
@@ -24,9 +25,14 @@
     })
 
 
+    const onChangeAddress = () => {
+      // console.log(`on change ${settings.kindContractAddress}`)
+      onSave()
+    }
+
   
     function onSave() {
-      
+      console.log(`saving ${JSON.stringify(settings, null, 2)}`)
       saveSettings(settings)
     }
   </script>
@@ -63,7 +69,7 @@
 
   <p class="pt-2">The deployed Kind fund address, which we should enter here (see example below).</p>
 
-  <div class="text-lg"><TextField labelPlacement="float" hint="The address of the deployed grunt fund contract" class="w-3/4 text-lg mt-2" label="Contract Address" bind:value={settings.kindContractAddress} /></div>
+  <div class="text-lg"><TextField on:change={() => onChangeAddress()} labelPlacement="float" hint="The address of the deployed grunt fund contract" class="w-3/4 text-lg mt-2" label="Contract Address" bind:value={settings.kindContractAddress} /></div>
 </div>
 
 <!-- <p class="p-8"><img src='/deployment.png' alt="Smart Contract Deploy" /></p> -->

@@ -3,11 +3,12 @@
 
   import { GruntFund } from './GruntFund';
 
-  import { Notification, Button, Tooltip, toTitleCase } from 'svelte-ux'
+  import { Notification, Icon, Button, Tooltip, toTitleCase } from 'svelte-ux'
   import type { DocLink, SignedUpload, UploadMetadata} from './docsign'
   import { validateDoc } from './docsign'
 
   import {
+    mdiAlert,
     mdiAlertOctagonOutline,
     mdiCheckCircleOutline
   } from '@mdi/js'
@@ -32,6 +33,7 @@
   let uploadMetadata : UploadMetadata | null = $state(null)
   let signatureUpload : SignedUpload | null = $state(null)
   let signatureIsValid = $state(false)
+  let isValid = $derived(signatureIsValid)
   let error = $state("")
 
   // the symbol which we retrieve from the chain
@@ -107,8 +109,23 @@
   const gruntName = (address : string) => gruntsByAddress.get(address) ?? address
 
   const handleDragOver = (event) => event.preventDefault()
+
+  const approveAndMint = async () => {
+    if (!uploadMetadata || !signatureUpload) {
+      error = "Bug no metadata"
+      return 
+    }
+
+    try {
+        const addreses = await gruntFund?.mint(uploadMetadata.publicKey, uploadMetadata.impliedFundAmount, signatureUpload.signature)
+        alert(JSON.stringify(addreses))
+    } catch(e) {
+        error = `Error minting token: ${e}`
+    }
+  }
 </script>
   
+{#if !signatureIsValid}
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
     class="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer transition-all hover:bg-gray-100 border-gray-300"
@@ -118,9 +135,10 @@
     <p class="text-gray-600 text-center">Drag and drop a .zip file here</p>
     <p class="text-sm text-gray-400">(Must contain metadata.json and signature.json)</p>
   </div>
+  {/if}
   
   {#if error}
-    <div class="grid gap-2 w-[400px]">
+    <div class="grid gap-2 w-[400px] mt-8">
       <Notification
         title={toTitleCase(error)}
         icon={mdiAlertOctagonOutline}
@@ -133,8 +151,19 @@
 
   {#if uploadMetadata && signatureUpload}
     
+    {#if signatureIsValid}
+    <div class="w-[400px] mt-4 mb-4">
+      <Notification
+        title="the document id valid"
+        description="The file {uploadMetadata.fileName} has been signed by {gruntName(uploadMetadata.publicKey)} at {uploadMetadata.timestamp}"
+        icon={mdiCheckCircleOutline}
+        color="success"
+        closeIcon
+      />
+    </div>
+  {/if}
     <div class="mt-4">
-      <p class="text-lg"><Tooltip title={uploadMetadata.publicKey}>"{toTitleCase(gruntName(uploadMetadata.publicKey))}"</Tooltip> requesting {uploadMetadata.impliedFundAmount} {fundSymbol}</p>
+      <p class="text-lg"><Tooltip title={uploadMetadata.publicKey}>"{toTitleCase(gruntName(uploadMetadata.publicKey))}"</Tooltip> is requesting {uploadMetadata.impliedFundAmount} {fundSymbol}</p>
       <p class="">Their request was created at {uploadMetadata.timestamp}</p>
       
       {#if docLink}
@@ -147,18 +176,16 @@
       </div>
       {/if}
 
-      {#if signatureIsValid}
-        <div class="w-[400px]">
-          <Notification
-            title="Document Valid"
-            description="The file {uploadMetadata.fileName} has been signed by {gruntName(uploadMetadata.publicKey)} at {uploadMetadata.timestamp}"
-            icon={mdiCheckCircleOutline}
-            color="success"
-            closeIcon
-          />
-        </div>
-      {/if}
     </div>
   {/if}
   
-  <div class="m-2"><Button variant="outline" color="secondary" onclick={onBack}>Back</Button></div>
+  <div class="m-2">
+    {#if isValid}
+      <Button variant="fill" color="primary" onclick={async () => approveAndMint()}>Approve</Button>
+    {/if}
+    <Button variant="outline" color="secondary" onclick={onBack}>Back</Button>
+  </div>
+
+  {#if isValid}
+    <p class="text-red-300"><Icon class="my-4 mr-4" data={mdiAlert}/>Note: be sure to upload this document to permanent store.</p>
+  {/if}

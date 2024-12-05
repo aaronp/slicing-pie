@@ -24,7 +24,7 @@ import { GruntFund } from "$lib/GruntFund"
     return {
         label : b.label ?? b.address,
         amount : Number(b.amount),
-        percent : total > 0 ? Math.floor(100 * Number(b.amount) / total) : 0
+        percent : total > 0 ? (100 * Number(b.amount) / total).toFixed(2) : 0
     }
   }))
 
@@ -52,7 +52,7 @@ import { GruntFund } from "$lib/GruntFund"
       },
     },
     {
-      header : "% share",
+      header : "share",
       name: "percent",
       align: "right",
       format: "integer",

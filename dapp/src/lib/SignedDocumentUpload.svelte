@@ -63,7 +63,7 @@
         // link.download = `${strippedName}.zip`
         signedDocLink = {
           href : URL.createObjectURL(zipBlob),
-          fileName : `${strippedName}.zip`
+          fileName : `${signedUpload.signature}-${strippedName}.zip`
         }
 
         // document.body.appendChild(link)
@@ -138,6 +138,7 @@
   
     {#if signedDocLink}
     <div class="bg-blue m-2 p-2">
+      Send this document to the grunt fund manager:
       <a class="text-blue-500 hover:text-blue-700 underline hover:underline-offset-4 focus:outline-none focus:ring focus:ring-blue-300 transition-all duration-200" 
         href={signedDocLink.href} download={signedDocLink.fileName} >{signedDocLink.fileName}</a>
     </div>

@@ -1,10 +1,7 @@
 <script lang="ts">
-    import { type Settings, type MetaMask, splitMapping } from "$lib"
     import { GruntFund, type EventData } from "$lib/GruntFund"
     import { onMount } from "svelte"
     import { Timeline, TimelineEvent } from "svelte-ux"
-    import Pie from "./Pie.svelte"
-    import GruntShare from "./GruntShare.svelte"
     import { mdiAbacus, mdiArrowRight, mdiCheckCircle } from '@mdi/js'
   
     type Props = {
@@ -18,11 +15,11 @@
   
     let gruntSymbol = $state('')
     onMount(async () => {
-      events = await gruntFund.events()
+      events = (await gruntFund.events())
       gruntSymbol = await gruntFund.getSymbol()
     })
   
-    const appleHistoryDetails = $derived(events.map((e) => {
+    const eventDetails = $derived(events.map((e) => {
 
         let icon = mdiAbacus
         let description = JSON.stringify(e.args)
@@ -38,7 +35,7 @@
         }
 
         return {
-            date : e.timestamp.toLocaleDateString(),
+            date : `${e.timestamp.toLocaleDateString()} ${e.timestamp.toLocaleTimeString()}`,
             title : e.event,
             description,
             icon
@@ -48,7 +45,7 @@
   </script>
   
   <Timeline vertical compact snapPoint>
-    {#each appleHistoryDetails as item, i}
+    {#each eventDetails as item, i}
       <TimelineEvent
         icon={item.icon}
         start={i % 2 === 0}
@@ -62,7 +59,7 @@
           <time class="font-mono italic">{item.date}</time>
           <div class="text-lg font-black">{item.title}</div>
           <div class="text-surface-content/70 text-sm text-secondary">
-            {item.description}
+            {item?.description}
           </div>
         </div>
       </TimelineEvent>

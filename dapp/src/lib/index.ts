@@ -42,33 +42,24 @@ export type MetaMask = {
   signerName : string | null
 }
 
-import { writable } from 'svelte/store';
-
-
-// Optionally, provide functions to update or reset the store
-// export const setFoo = (value: string) => foo.set(value);
-// export const resetFoo = () => foo.set(null);
-
-
  // Function to fetch accounts from MetaMask
  export async function connectToMetaMask() : Promise<Result<MetaMask>> {
   if (typeof window.ethereum !== 'undefined') {
       try {
-          console.log('Connecting to MetaMask')
           // Request MetaMask accounts
           await window.ethereum.request({ method: 'eth_requestAccounts' })
 
           // Create an ethers provider
-          console.log('Getting provider')
-          const provider = new ethers.BrowserProvider(window.ethereum)
+          const options = {
+            cacheTimeout: -1,
+          }
+          const provider = new ethers.BrowserProvider(window.ethereum, null, options)
 
           // Get the list of accounts
-          console.log('listing accounts')
           const accountList = await provider.listAccounts()
           
-          console.log('getting signer')
           const signer = await provider.getSigner()
-          console.log('getting signer address')
+          
           let signerAddress : string | null = ''
           try {
             signerAddress = await signer.getAddress()
@@ -78,14 +69,12 @@ import { writable } from 'svelte/store';
 
 
           let signerName : string | null = null
-          console.log('getting signer name')
           try {
             signerName = await provider.lookupAddress(signerAddress)
           } catch (e) {
             console.error(`Error getting signer name ${e}`)
           }
 
-          console.log('creating mm details')
           const mm : MetaMask = {
             connectedAccounts : accountList.map(account => account.address),
             provider,
@@ -94,7 +83,6 @@ import { writable } from 'svelte/store';
             signerName
           }
 
-          console.log(`got ${JSON.stringify(mm, null, 2)}`)
           return mm
       } catch (error) {
           return `Error fetching accounts: ${error.message}`
@@ -149,30 +137,29 @@ export const loadSettings = () : Settings => {
 
 export const saveSettings = (s : Settings) => localStorage.setItem('grunt-settings', JSON.stringify(s))
 
-
 export const idFromPath = (pathname: string, pathIndexFromEnd : number) => {
-    const parts = pathname.split('/').filter((p) => p.length > 0)
-    if (parts.length < 2) {
-      return ''
-    } else {
-      const id = parts[parts.length - 1 - pathIndexFromEnd] ?? ''
-      return id
-    }
+  const parts = pathname.split('/').filter((p) => p.length > 0)
+  if (parts.length < 2) {
+    return ''
+  } else {
+    const id = parts[parts.length - 1 - pathIndexFromEnd] ?? ''
+    return id
   }
+}
 
 export const degToRad = (degrees : number) => (degrees * Math.PI) / 180
 
 export const arcForIndex = (centerX : number, centerY : number, numSections :number, index :number, r : number) : ArcCoords => {
-    const sectionAngle = degToRad(360 / numSections)
-    const startAngle = index * sectionAngle
-    const endAngle = (index + 1) * sectionAngle
+  const sectionAngle = degToRad(360 / numSections)
+  const startAngle = index * sectionAngle
+  const endAngle = (index + 1) * sectionAngle
 
-    const x1 = centerX + r * Math.cos(startAngle)
-    const y1 = centerY + r * Math.sin(startAngle)
-    const x2 = centerX + r * Math.cos(endAngle)
-    const y2 = centerY + r * Math.sin(endAngle)
-    return {
-      sectionAngle, startAngle, endAngle,
-      x1, y1, x2, y2
-    }
+  const x1 = centerX + r * Math.cos(startAngle)
+  const y1 = centerY + r * Math.sin(startAngle)
+  const x2 = centerX + r * Math.cos(endAngle)
+  const y2 = centerY + r * Math.sin(endAngle)
+  return {
+    sectionAngle, startAngle, endAngle,
+    x1, y1, x2, y2
   }
+}
