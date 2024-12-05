@@ -35,10 +35,10 @@ contract KindFund {
     }
 
     /// @param _kindFund The address of the primary GruntFund contract
-    constructor(address _kindFund) {
+    constructor(address _kindFund, address _owner) {
         require(_kindFund != address(0), "KindFund address cannot be zero");
         kindFund = _kindFund;
-        owner = msg.sender;
+        owner = _owner;
     }
 
     /// @notice Checks if a GruntFund address is already in the list

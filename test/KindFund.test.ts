@@ -33,7 +33,7 @@ describe("KindFund Contract", function () {
 
     // Deploy the KindFund contract with holdingKindFund as the primary fund
     const KindFund = await ethers.getContractFactory("KindFund")
-    kindFund = await KindFund.deploy(holdingKindFundAddress)
+    kindFund = await KindFund.deploy(holdingKindFundAddress, owner.address)
 
     // await kindFund.deployed()
     const kindFundAddress = await kindFund.getAddress()

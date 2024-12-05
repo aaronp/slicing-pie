@@ -83,6 +83,7 @@ export class GruntFund {
       fromBlock: from,
       toBlock: 'latest',
     }
+  }
 
     const iface = new ethers.Interface(abi)
     const logs = await this.provider.getLogs(filter)

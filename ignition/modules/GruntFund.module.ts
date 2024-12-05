@@ -6,7 +6,7 @@ const GruntFundModule = buildModule("GruntFundModule", (m) => {
   const fundSymbol = m.getParameter("symbol", "DGF")
   const owner = m.getParameter("owner", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 
-  const fund = m.contract("GruntFund", [fundName, fundSymbol, "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"],
+  const fund = m.contract("GruntFund", [fundName, fundSymbol, owner],
     {
         from : '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
         // from : '0x72A828e687d92b485C9e4827FDF21D94B10769D6'
