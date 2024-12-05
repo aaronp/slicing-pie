@@ -1,5 +1,6 @@
 import { ethers } from "ethers"
 import { type Settings as AppSettings, type MetaMask } from "$lib"
+import { KindFund } from "./KindFund";
 
 
 const abi = [
@@ -54,6 +55,21 @@ export class GruntFund {
     const signer = await provider.getSigner()
     return new GruntFund(contractAddress, provider, signer)
   }
+
+  /**
+   * 
+   * @param kindAddress the address of the kind holding group contract
+   * @param recipient the grunt recipient
+   * @param amount the amount to mint
+   * @param documentHash a document hash
+   * @returns 
+   */
+  async mintForKindFund(kindAddress : string, recipient : string, amount : ethers.BigNumberish, documentHash : string) {
+    const kind = new KindFund(kindAddress, this.provider, this.signer)
+    const thisAddress = await this.contract.getAddress()
+    const result = await kind.mint(recipient, thisAddress, amount, documentHash)
+    return result
+  }
   
   // Read-only methods
   async getName(): Promise<string> {
@@ -83,7 +99,6 @@ export class GruntFund {
       fromBlock: from,
       toBlock: 'latest',
     }
-  }
 
     const iface = new ethers.Interface(abi)
     const logs = await this.provider.getLogs(filter)
