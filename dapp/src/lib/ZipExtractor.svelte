@@ -1,34 +1,27 @@
 <script lang="ts">
-  import { Notification, Icon, Steps, Step, toTitleCase } from 'svelte-ux'
+    import { GruntFund } from './GruntFund';
+
+  import { Notification, Icon, Tooltip, toTitleCase } from 'svelte-ux'
   import type { SignedUpload, UploadMetadata} from './docsign'
   import { validateDoc } from './docsign'
 
   import {
-    mdiCheck,
-    mdiListBoxOutline,
-    mdiCreditCardOutline,
-    mdiTruckDeliveryOutline,
     mdiAlertOctagonOutline,
   mdiCheckCircleOutline
 } from '@mdi/js'
 
   import { splitByAddress, type MetaMask, type Settings } from '$lib';
-  import JSZip, { file } from 'jszip'
+  import JSZip from 'jszip'
 
-  const stepsWithIcon = [
-    { label: 'Register', completed: true, icon: mdiCheck },
-    { label: 'Choose plan', completed: true, icon: mdiListBoxOutline },
-    { label: 'Purchase', completed: false, icon: mdiCreditCardOutline },
-    { label: 'Receive product', completed: false, icon: mdiTruckDeliveryOutline },
-  ];
     
   type Props = {
     settings : Settings,
     account : MetaMask,
+    gruntFund : GruntFund,
     fundAddress : string
   }
 
-  let { settings, account, fundAddress } : Props = $props()
+  let { settings, account, gruntFund, fundAddress } : Props = $props()
 
   let gruntsByAddress = splitByAddress(settings.grunts)
   let fundsByAddress = splitByAddress(settings.funds)
@@ -86,11 +79,10 @@
     }
   }
 
-  const fundName = (address : string) => fundsByAddress.get(address) ?? gruntsByAddress
+  const fundName = (address : string) => fundsByAddress.get(address) ?? address
+  const gruntName = (address : string) => gruntsByAddress.get(address) ?? address
 
-  const handleDragOver = (event) => {
-    event.preventDefault()
-  }
+  const handleDragOver = (event) => event.preventDefault()
 </script>
   
   <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -106,38 +98,31 @@
   {#if uploadMetadata && signatureUpload}
     
     <div class="mt-4">
-      <h3 class="text-lg font-semibold">{uploadMetadata.fileName} uploaded at {uploadMetadata.timestamp}</h3>
-      <Steps>
-        {#if uploadMetadata.fundAddress === fundAddress}
-          <Step completed classes={{ completed: "bg-success text-success-content" }} >Fund Matches</Step>
-        {:else}
-          <Step point="!" classes={{ point: "bg-danger text-danger-content" }} >Fund {fundName(uploadMetadata.fundAddress)} does not match {fundName(fundAddress)}</Step>
-        {/if}
-        
-
-        {#if error}
-        <div class="grid gap-2 w-[400px]">
+      <p class="text-lg"><Tooltip title={uploadMetadata.publicKey}>{gruntName(uploadMetadata.publicKey)}</Tooltip> requesting {uploadMetadata.impliedFundAmount} {await gruntFund.getSymbol()}</p>
+      <p class="">It was created at {uploadMetadata.timestamp}</p>
+      
+      {#if error}
+      <div class="grid gap-2 w-[400px]">
+        <Notification
+          title={toTitleCase(error)}
+          icon={mdiAlertOctagonOutline}
+          danger
+          closeIcon
+        />
+      </div>
+      {/if}
+      
+      {#if signatureIsValid}
+        <div class="w-[400px]">
           <Notification
-            title={toTitleCase(error)}
-            icon={mdiAlertOctagonOutline}
-            danger
+            title="Document Valid"
+            description="The file {uploadMetadata.fileName} has been signed by {gruntName(uploadMetadata.publicKey)} at {uploadMetadata.timestamp}"
+            icon={mdiCheckCircleOutline}
+            color="success"
             closeIcon
           />
         </div>
-        {/if}
-        
-        {#if signatureIsValid}
-          <div class="w-[400px]">
-            <Notification
-              title="Successfully Saved!"
-              icon={mdiCheckCircleOutline}
-              color="success"
-              closeIcon
-            />
-          </div>
-        {/if}
-        
-      </Steps>
+      {/if}
     </div>
   {/if}
   

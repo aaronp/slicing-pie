@@ -39,13 +39,12 @@
     <p class="text-secondary text-bold text-xl m-8">Verify the signed documents:</p>
     {#if account && settings && gruntFund}
 
-        <ZipExtractor {settings} {account} {fundAddress} />
-        <!-- <VerifySignature {account} /> -->
+        <ZipExtractor {settings} {account} {fundAddress} {gruntFund} />
 
 
-    <div class="text-center">
+    <!-- <div class="text-center">
         <Mint {settings} {gruntFund} {fundAddress} />
-    </div>
+    </div> -->
     
     {:else}
         <p>Account is not connected</p>
