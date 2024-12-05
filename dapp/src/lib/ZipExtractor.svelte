@@ -3,7 +3,7 @@
 
   import { GruntFund } from './GruntFund';
 
-  import { Notification, Icon, Button, Tooltip, toTitleCase } from 'svelte-ux'
+  import { Notification, Icon, Button, Tooltip, toTitleCase, Checkbox } from 'svelte-ux'
   import type { DocLink, SignedUpload, UploadMetadata} from './docsign'
   import { validateDoc } from './docsign'
 
@@ -33,6 +33,7 @@
   let uploadMetadata : UploadMetadata | null = $state(null)
   let signatureUpload : SignedUpload | null = $state(null)
   let signatureIsValid = $state(false)
+  let useHoldingFund = $state(false)
   let isValid = $derived(signatureIsValid)
   let error = $state("")
 
@@ -115,17 +116,33 @@
 
   const handleDragOver = (event) => event.preventDefault()
 
+  const mintToHoldingFund = () => {
+    try {
+        const addreses = await gruntFund?.mintForKindFund(settings.kindContractAddress, uploadMetadata.publicKey, uploadMetadata.impliedFundAmount, signatureUpload.signature)
+        console.log(`submitted ${JSON.stringify(addreses)}`)
+    } catch(e) {
+        error = `Error minting token: ${e}`
+    }
+  }
+
+  const mintToGruntFund = () => {
+    try {
+        const addreses = await gruntFund?.mint(uploadMetadata.publicKey, uploadMetadata.impliedFundAmount, signatureUpload.signature)
+        console.log(`submitted ${JSON.stringify(addreses)}`)
+    } catch(e) {
+        error = `Error minting token: ${e}`
+    }
+  }
   const approveAndMint = async () => {
     if (!uploadMetadata || !signatureUpload) {
       error = "Bug no metadata"
       return 
     }
 
-    try {
-        const addreses = await gruntFund?.mint(uploadMetadata.publicKey, uploadMetadata.impliedFundAmount, signatureUpload.signature)
-        console.log(`submitted ${JSON.stringify(addreses)}`)
-    } catch(e) {
-        error = `Error minting token: ${e}`
+    if (useHoldingFund) {
+      await mintToHoldingFund()
+    } else {
+      await mintToGruntFund()
     }
   }
 </script>
@@ -184,8 +201,15 @@
     </div>
   {/if}
   
-  <div class="m-2">
+
+  <div class="my-2">
     {#if isValid}
+
+    <div class="my-2 py-2">
+      <Tooltip title="If this is checked, the grunt will earn equity in the holding company, and the holding company will earn equity in the grunt fund">
+        <Checkbox  bind:checked={useHoldingFund} fullWidth>Allocate to Holding Group</Checkbox>
+      </Tooltip>
+    </div>
       <Button variant="fill" color="primary" onclick={async () => approveAndMint()}>Approve</Button>
     {/if}
     <Button variant="outline" color="secondary" onclick={onBack}>Back</Button>
@@ -200,6 +224,5 @@
       {:else}
       this document
       {/if} to permanent store.</p>
-
     
   {/if}
