@@ -1,10 +1,7 @@
 <script lang="ts">
 
-import Deploy from "$lib/Deploy.svelte"
-import { GruntFund } from "$lib/GruntFund"
+import DeployGruntFund from "$lib/DeployGruntFund.svelte"
 import { onMount } from "svelte"
-import { Notification } from "svelte-ux"
-import {mdiAlertOctagonOutline} from '@mdi/js'
 import { connectToMetaMask, loadSettings, type MetaMask, type Settings } from "$lib"
 
 
@@ -26,6 +23,8 @@ onMount(async () => {
 </script>
 
 {#if settings && account }
-    <Deploy {settings} {account} />
+    <DeployGruntFund {settings} {account} />
+{:else}
+    <p>...</p>
 {/if}
 
