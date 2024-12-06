@@ -72,11 +72,11 @@ settings({
 			</div>
 
 			<div class="self-start m-2 text-white">
-				<NavItem icon={mdiLaunch} text="Create Fund" currentUrl={$page.url} path="/deploy" ></NavItem>
+				<NavItem icon={mdiLaunch} text="Create Fund" currentUrl={$page.url} path="/deploy/gruntfund" ></NavItem>
 			</div>
 
 			<div class="self-start m-2 text-white">
-				<NavItem icon={mdiGroup} text="Create Group Fund" currentUrl={$page.url} path="/deploy" ></NavItem>
+				<NavItem icon={mdiGroup} text="Create Group Fund" currentUrl={$page.url} path="/deploy/kindfund" ></NavItem>
 			</div>
 
 			{#each funds as fund}
