@@ -1,4 +1,6 @@
 <script lang="ts">
+    import SelectOrCreate from "./SelectOrCreate.svelte";
+
     import { onMount } from "svelte";
 
     import { GruntFund } from "./GruntFund"
@@ -7,8 +9,8 @@
     import contractData from "../../../artifacts/contracts/KindFund.sol/KindFund.json"
 
     import { type MetaMask } from "$lib"
-    import { loadSettings, saveSettings, type Settings } from "$lib/settings"
-    import { Toggle, Dialog, Button, TextField, Notification } from "svelte-ux"
+    import { loadSettings, saveSettings, type Settings, toMenuOptions } from "$lib/settings"
+    import { Toggle, Dialog, Button, TextField, Notification, type MenuOption } from "svelte-ux"
 
     type Props = {
         settings : Settings,
@@ -28,7 +30,23 @@
     let settings : Settings | null = $state(null)
     let newContractAddress = $state("")
 
-    const onDeploy = () => deployContract(backingGruntFundAddress, owner)
+    const onDeploy = async () => {
+      const address = await deployContract(backingGruntFundAddress, owner)
+
+      // permission the underlying fund to allow the Kind contact to mint
+      const underlying = await GruntFund.forAddress(gruntFundAddressToPermission)
+      // const isAllowedBefore = await underlying.isAllowedMinter(address)
+
+      // console.log(`isAllowed=${isAllowedBefore} for ${address}`)
+
+      const resonse = await underlying.addMinter(address)
+      console.log(`addMinter=${JSON.stringify(resonse, null, 2)}`)
+
+      const isAllowedAfter = await underlying.isAllowedMinter(address)
+
+      console.log(`isAllowed after=${isAllowedAfter} for ${address}`)
+
+    }
 
     
     const onPermissionForMint = async () => {
@@ -64,6 +82,19 @@
             message = `Deployment failed: ${error}`
         }
         saving = false
+        return newContractAddress
+    }
+
+    let fundOptions : MenuOption[] = $derived(settings ? toMenuOptions((settings as Settings).funds) : [])
+    let gruntOptions : MenuOption[] = $derived(settings ? toMenuOptions((settings as Settings).grunts) : [])
+
+    const onCreate = (newOption : MenuOption) => {
+      console.log(`...... creating ${JSON.stringify(newOption)}`)
+      if (settings) {
+        settings.funds[newOption.label] = newOption.value + "!!!"
+        saveSettings(settings)
+        settings = settings
+      }
     }
 
     onMount(() => {
@@ -71,11 +102,17 @@
       newContractAddress = settings.kindContractAddress
     })
 </script>
+{#key settings}
+  <div class="m-2 w-1/2">
+    <SelectOrCreate label="Grunt Fund" options={fundOptions} bind:value={backingGruntFundAddress} />
+  </div>
 
+  <div class="m-2 w-1/2">
+    <SelectOrCreate label="Contracta Owner Address" options={gruntOptions} bind:value={owner} />
+  </div>
+{/key}
 
-<TextField class="m-2 w-1/2" label="Backing Grunt Fund Address:" bind:value={backingGruntFundAddress} />
-<TextField class="m-2 w-1/2" label="Owner Address:" bind:value={owner} />
-<TextField class="m-2 w-1/2" label="Kind Address:" bind:value={newContractAddress} />
+<!-- <TextField class="m-2 w-1/2" label="Kind Address:" bind:value={newContractAddress} /> -->
 <Button disabled={saving} variant="fill" color="primary" class="m-2" onclick={() => onDeploy()} >Deploy</Button>
 
 {#if message}

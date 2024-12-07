@@ -1,7 +1,8 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
 
-  import { type Settings, type MetaMask, splitMapping } from "$lib"
+  import { type MetaMask} from "$lib"
+  import { type Settings, splitMapping } from "$lib/settings"
   import { GruntFund } from "$lib/GruntFund"
   import { onMount } from "svelte"
   import Pie from "./Pie.svelte"

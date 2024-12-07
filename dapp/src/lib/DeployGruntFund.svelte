@@ -4,7 +4,7 @@
     import contractData from "../../../artifacts/contracts/GruntFund.sol/GruntFund.json"
 
     import { type MetaMask } from "$lib"
-    import { addGruntFund, loadSettings, type Settings } from "$lib/settings"
+    import { addGruntFund, loadSettings, type Settings, toMenuOptions } from "$lib/settings"
     import { Button, TextField, Notification } from "svelte-ux"
 
     type Props = {

@@ -1,3 +1,4 @@
+import type { MenuOption } from "svelte-ux"
 
 // our application settings, saved to persistent (perhaps local) storage
 export type Settings = {
@@ -40,6 +41,10 @@ export const toMap = (array : LabeledAddress[]) => {
   })
   return map
 }
+export const toMenuOptions = (record : Record<string, string>) :  MenuOption[]  => Object.entries(record).map(([label, address]) => {
+  return {label, value : address}
+})
+
 export const toText = (array : Record<string, string>) => Object.entries(array).map(([label, address]) => `${label}:${address}`).join('\n')
 export const toTextFromLabels = (array : LabeledAddress[]) => array.map(({ label, address }) => `${label}:${address}`).join('\n')
 
