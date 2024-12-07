@@ -23,7 +23,7 @@ import {
 } from '@mdi/js'
 
 import { onMount } from "svelte"
-import { type Result, type MetaMask, type LabeledAddress, type Settings, loadSettings, splitMapping } from "$lib"
+import { type LabeledAddress, type Settings, loadSettings, splitMapping } from "$lib/settings"
 import { page } from '$app/stores'
 import '../app.postcss'
 let appSettings : Settings | null = $state(null)

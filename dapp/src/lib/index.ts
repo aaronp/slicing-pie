@@ -6,32 +6,6 @@ export type Balance = {
   amount :number
 }
 
-
-export type ArcCoords = {
-  sectionAngle : number,
-  startAngle : number,
-  endAngle : number,
-  
-  x1 : number,
-  y1 : number,
-  x2 : number,
-  y2 : number
-}
-
-
-// our application settings, saved to persistent (perhaps local) storage
-export type Settings = {
-
-  // grunts in a <name>:<address> format
-  grunts : string,
-
-  // funds in a <name>:<address> format
-  funds : string,
-
-  // the kind group address
-  kindContractAddress : string
-}
-
 export type Result<A> = A | string
 
 export type MetaMask = {
@@ -92,51 +66,6 @@ export type MetaMask = {
   }
 }
 
-export type LabeledAddress = {
-    label : string
-    address : string
-}
-
-// takes a text block and sparates the lines into key:value pairs
-export const splitByAddress = (content : string) => {
-  let map = new Map<string, string>()
-  const grunts =  splitMapping(content)
-  grunts.forEach(grunt => {
-      map.set(grunt.address, grunt.label)
-  })
-  return map
-}
-export const splitMapping = (content : string) : LabeledAddress[] => {
-    return content.split('\n')
-        .map(line => line.trim())
-        .filter(line => line.includes(':'))
-        .map(line => {
-            const [label, address] = line.split(':').map(part => part.trim());
-            return { label, address }
-        })
-}
-
-const defaultSettings = () : Settings => {
-    return {
-      grunts : '',
-      funds : '',
-      kindContractAddress : ''
-    }
-  }
-
-  // let address : string = $state('');
-export const loadSettings = () : Settings => {
-    const str = localStorage.getItem('grunt-settings')
-    if (!str) {
-        saveSettings(defaultSettings())
-        return loadSettings()
-    } else {
-        return JSON.parse(str) as Settings
-    }
-}
-
-export const saveSettings = (s : Settings) => localStorage.setItem('grunt-settings', JSON.stringify(s))
-
 export const idFromPath = (pathname: string, pathIndexFromEnd : number) => {
   const parts = pathname.split('/').filter((p) => p.length > 0)
   if (parts.length < 2) {
@@ -144,22 +73,5 @@ export const idFromPath = (pathname: string, pathIndexFromEnd : number) => {
   } else {
     const id = parts[parts.length - 1 - pathIndexFromEnd] ?? ''
     return id
-  }
-}
-
-export const degToRad = (degrees : number) => (degrees * Math.PI) / 180
-
-export const arcForIndex = (centerX : number, centerY : number, numSections :number, index :number, r : number) : ArcCoords => {
-  const sectionAngle = degToRad(360 / numSections)
-  const startAngle = index * sectionAngle
-  const endAngle = (index + 1) * sectionAngle
-
-  const x1 = centerX + r * Math.cos(startAngle)
-  const y1 = centerY + r * Math.sin(startAngle)
-  const x2 = centerX + r * Math.cos(endAngle)
-  const y2 = centerY + r * Math.sin(endAngle)
-  return {
-    sectionAngle, startAngle, endAngle,
-    x1, y1, x2, y2
   }
 }

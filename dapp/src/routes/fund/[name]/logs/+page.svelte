@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { type MetaMask, type Settings, loadSettings, connectToMetaMask, splitMapping, idFromPath } from "$lib"
+    import { type MetaMask, connectToMetaMask, idFromPath } from "$lib"
+    import { type Settings, loadSettings, splitMapping } from "$lib/settings"
     import { GruntFund } from "$lib/GruntFund"
     import { onMount } from "svelte"
     import Logs from "$lib/Logs.svelte"

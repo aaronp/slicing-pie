@@ -1,6 +1,7 @@
 <script lang="ts">
 
-  import { type LabeledAddress, type Settings, loadSettings, connectToMetaMask, type MetaMask } from "$lib"
+  import { connectToMetaMask, type MetaMask } from "$lib"
+  import { type Settings, loadSettings } from "$lib/settings"
   import { goto } from '$app/navigation'
   import Accounts from '../lib/Accounts.svelte'
   import { onMount } from "svelte"

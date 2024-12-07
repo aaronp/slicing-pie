@@ -1,7 +1,6 @@
 <script lang="ts">
-    import { type MetaMask, type Settings, loadSettings, connectToMetaMask, idFromPath } from "$lib"
+    import { type MetaMask, connectToMetaMask, idFromPath } from "$lib"
     import SignedDocumentUpload from "$lib/SignedDocumentUpload.svelte"
-    import { GruntFund } from "$lib/GruntFund"
 	import { page } from '$app/stores'
     import { onMount } from "svelte"
     import { Button } from 'svelte-ux'

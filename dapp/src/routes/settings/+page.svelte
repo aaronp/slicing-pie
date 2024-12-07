@@ -1,26 +1,45 @@
 <script lang="ts">
     import { TextField, Collapse } from 'svelte-ux'
     import { writable } from 'svelte/store'
-	  import { loadSettings, saveSettings } from '$lib'
-
-    const onSave = () => saveSettings(settings)
+	  import { loadSettings, saveSettings, splitMapping, toText, type Settings } from '$lib/settings'
+    import { onMount } from 'svelte';
 
     const onChangeAddress = () => onSave()
   
-    let settings = $state(loadSettings())
+    let gruntAddresses = writable("")
+    let fundAddresses = writable("")
 
-    let gruntAddresses = writable(settings.grunts)
+    let grunts = $state("")
+    let funds = $state("")
+    let kindContractAddress = $state("")
+
+
     // Sync the writable store with localStorage
     gruntAddresses.subscribe(value => {
-        settings.grunts = value
+        grunts = value
         onSave()
     })
 
+    const onSave = () => saveSettings({
+        grunts : splitMapping(grunts),
+        funds : splitMapping(funds),
+        kindContractAddress
+      })
 
-    let fundAddresses = writable(settings.funds)
+    onMount(() => {
+      let settings = loadSettings()
+      grunts = toText(settings.grunts)
+      gruntAddresses.set(grunts)
+
+      funds = toText(settings.funds)
+      fundAddresses.set(funds)
+
+      kindContractAddress = settings.kindContractAddress
+    })
+
     // Sync the writable store with localStorage
     fundAddresses.subscribe(value => {
-        settings.funds = value
+        funds = value
         onSave()
     })
 
@@ -58,7 +77,7 @@
 
   <p class="pt-2">The deployed Kind fund address, which we should enter here (see example below).</p>
 
-  <div class="text-lg"><TextField on:change={() => onChangeAddress()} labelPlacement="float" hint="The address of the deployed grunt fund contract" class="w-3/4 text-lg mt-2" label="Contract Address" bind:value={settings.kindContractAddress} /></div>
+  <div class="text-lg"><TextField on:change={() => onChangeAddress()} labelPlacement="float" hint="The address of the deployed grunt fund contract" class="w-3/4 text-lg mt-2" label="Contract Address" bind:value={kindContractAddress} /></div>
 </div>
 
 <!-- <p class="p-8"><img src='/deployment.png' alt="Smart Contract Deploy" /></p> -->

@@ -1,8 +1,8 @@
 <script lang="ts">
 
-    import { type MetaMask, type Settings, idFromPath, loadSettings, connectToMetaMask } from "$lib"
+    import { type MetaMask, idFromPath, connectToMetaMask } from "$lib"
+    import { type Settings, loadSettings } from "$lib/settings"
     import Balances from "$lib/Balances.svelte"
-    import { GruntFund } from "$lib/GruntFund"
     import { onMount } from "svelte"
     import { Notification } from "svelte-ux"
     import {mdiAlertOctagonOutline} from '@mdi/js'

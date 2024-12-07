@@ -2,7 +2,8 @@
 
 import DeployKindFund from "$lib/DeployKindFund.svelte"
 import { onMount } from "svelte"
-import { connectToMetaMask, loadSettings, type MetaMask, type Settings } from "$lib"
+import { connectToMetaMask, type MetaMask } from "$lib"
+import { loadSettings, type Settings } from "$lib/settings"
 
 
 let message = $state('')

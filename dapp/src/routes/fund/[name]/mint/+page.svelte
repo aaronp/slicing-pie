@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { type MetaMask, type Settings, loadSettings, connectToMetaMask, idFromPath } from "$lib"
+    import { type Settings, loadSettings } from "$lib/settings"
+    import { type MetaMask, connectToMetaMask, idFromPath } from "$lib"
     import { GruntFund } from "$lib/GruntFund"
 	import { page } from '$app/stores'
     import { onMount } from "svelte"

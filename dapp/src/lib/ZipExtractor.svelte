@@ -13,7 +13,7 @@
     mdiCheckCircleOutline
   } from '@mdi/js'
 
-  import { splitByAddress, type MetaMask, type Settings } from '$lib';
+  import { toMap, type MetaMask, type Settings } from '$lib';
   import JSZip from 'jszip'
 
     
@@ -25,10 +25,10 @@
     onBack : () => void
   }
 
-  let { settings, account, gruntFund, fundAddress, onBack } : Props = $props()
+  let { settings, gruntFund, onBack } : Props = $props()
 
-  let gruntsByAddress = splitByAddress(settings.grunts)
-  let fundsByAddress = splitByAddress(settings.funds)
+  let gruntsByAddress = toMap(settings.grunts)
+  let fundsByAddress = toMap(settings.funds)
 
   let uploadMetadata : UploadMetadata | null = $state(null)
   let signatureUpload : SignedUpload | null = $state(null)
