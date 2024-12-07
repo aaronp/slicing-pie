@@ -1,9 +1,11 @@
 <script lang="ts">
-    import { ethers } from "ethers";
+
+    import { ethers } from "ethers"
     import contractData from "../../../artifacts/contracts/GruntFund.sol/GruntFund.json"
 
-    import { type Settings, type MetaMask, splitMapping } from "$lib"
-    import { Button, TextField } from "svelte-ux"
+    import { type MetaMask } from "$lib"
+    import { addGruntFund, loadSettings, type Settings } from "$lib/settings"
+    import { Button, TextField, Notification } from "svelte-ux"
 
     type Props = {
         settings : Settings,
@@ -16,6 +18,8 @@
     const bytecode = contractData.bytecode
 
 
+    let saving = $state(false)
+    let message = $state('')
     let name = $state("foo")
     let symbol = $state("bar")
     let owner = $state("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266")
@@ -25,21 +29,28 @@
     }
     // Function to deploy the contract
     async function deployContract(_name: string, _symbol: string, _owner: string) {
-        
+
+        saving = true
         try {
             const factory = new ethers.ContractFactory(abi, bytecode, account.signer)
 
             console.log("Deploying contract...")
+            // TODO - add to pending transactinos
             const contract = await factory.deploy(_name, _symbol, _owner)
             console.log("Deploy got ...", contract)
-            
 
             const a = await contract.getAddress()
-            console.log(`Contract deployed at: ${a}`)
-            alert(`Contract deployed successfully at address: ${a}`)
+
+            message = `Contact deployed to ${a}`
+            addGruntFund(loadSettings(), {
+                label : name,
+                address : a
+            })
         } catch (error) {
+            saving = false
             console.error("Deployment failed:", error)
         }
+        saving = false
     }
 </script>
 
@@ -47,4 +58,8 @@
 <TextField class="m-2 w-1/2" label="Fund Name:" bind:value={name} />
 <TextField class="m-2 w-1/2" label="Symbol:" bind:value={symbol} />
 <TextField class="m-2 w-1/2" label="Owner Address:" bind:value={owner} />
-<Button variant="fill" color="primary" class="m-2" onclick={() => onDeploy()} >Deploy</Button>
+<Button disabled={saving} variant="fill" color="primary" class="m-2" onclick={() => onDeploy()} >Deploy</Button>
+
+{#if message}
+    <Notification title={message} />
+{/if}

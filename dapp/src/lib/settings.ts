@@ -52,6 +52,7 @@ export const splitMapping = (content : string) : Record<string, string> => {
           const [label, address] = line.split(':').map(part => part.trim())
           record[label] = address
       })
+      console.log(`splitMapping:\n${content}\n\nreturned\n${JSON.stringify(record, null, 2)}`)
   return record
 }
 
@@ -66,6 +67,15 @@ export const splitMappingAsLabels = (content : string) : LabeledAddress[] => {
         })
 }
 
+export const addGruntFund = (settings  : Settings, entry : LabeledAddress)  => {
+  settings.funds[entry.label] = entry.address
+  saveSettings(settings)
+}
+
+export const addGrunt = (entry : LabeledAddress, settings  : Settings)  => {
+  settings.grunts[entry.label] = entry.address
+  saveSettings(settings)
+}
 
   // let address : string = $state('');
 export const loadSettings = () : Settings => {
@@ -78,4 +88,10 @@ export const loadSettings = () : Settings => {
     }
 }
 
-export const saveSettings = (s : Settings) => localStorage.setItem('grunt-settings', JSON.stringify(s))
+
+export const saveSettings = (s : Settings) => {
+  const id = (new Date()).toISOString()
+  // keep a back-up. TODO - clean up old copies!
+  localStorage.setItem(`grunt-settings-${id}`, JSON.stringify(s))
+  localStorage.setItem('grunt-settings', JSON.stringify(s))
+}

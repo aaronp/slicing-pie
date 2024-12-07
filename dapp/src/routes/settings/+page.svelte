@@ -1,10 +1,9 @@
 <script lang="ts">
     import { TextField, Collapse } from 'svelte-ux'
     import { writable } from 'svelte/store'
-	  import { loadSettings, saveSettings, splitMapping, toText, type Settings } from '$lib/settings'
+	  import { loadSettings, saveSettings, splitMapping, toText } from '$lib/settings'
     import { onMount } from 'svelte';
 
-    const onChangeAddress = () => onSave()
   
     let gruntAddresses = writable("")
     let fundAddresses = writable("")
@@ -13,20 +12,25 @@
     let funds = $state("")
     let kindContractAddress = $state("")
 
+    const onSave = () => {
+      if (localStorage) {
+          saveSettings({
+          grunts : splitMapping(grunts),
+          funds : splitMapping(funds),
+          kindContractAddress
+        })
+      }
+    }
 
-    // Sync the writable store with localStorage
-    gruntAddresses.subscribe(value => {
-        grunts = value
-        onSave()
-    })
+    const onChangeAddress = () => onSave()
 
-    const onSave = () => saveSettings({
-        grunts : splitMapping(grunts),
-        funds : splitMapping(funds),
-        kindContractAddress
-      })
+    let message = $state('')
 
     onMount(() => {
+      if (!localStorage) {
+        message = 'could not load - localStorage is kaput'
+        return
+      }
       let settings = loadSettings()
       grunts = toText(settings.grunts)
       gruntAddresses.set(grunts)
@@ -35,18 +39,26 @@
       fundAddresses.set(funds)
 
       kindContractAddress = settings.kindContractAddress
-    })
 
-    // Sync the writable store with localStorage
-    fundAddresses.subscribe(value => {
+      // Sync the writable store with localStorage
+      gruntAddresses.subscribe(value => {
+          grunts = value
+          onSave()
+      })
+
+      // Sync the writable store with localStorage
+      fundAddresses.subscribe(value => {
         funds = value
         onSave()
+      })
+
     })
 
   </script>
 
 <h1 class="text-2xl ml-2 font-bold mb-2">Settings</h1>  
 
+{message}
 <!-- Funds Input Section -->
 
 <div class="grid grid-cols-1 gap-2 w-3/4">

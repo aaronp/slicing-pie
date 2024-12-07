@@ -1,6 +1,6 @@
 <script lang="ts">
 
-  import { arcForIndex, degToRad } from "$lib"
+  import { arcForIndex, degToRad } from "$lib/geometry"
 
   export type Section = {
     label : string,
@@ -36,7 +36,7 @@
 
   function textFlipTransform(index :number, section : Section) {
     // const { startAngle, endAngle } = arc(index, labelRadius)
-    const startAngle = degToRad(section.fromDeg)
+    const startAngle = degToRad(section.fromDeg)q
     const endAngle = degToRad(section.toDeg)
     // const r = radius
     // const x1 = centerX + r * Math.cos(startAngle)
