@@ -5,19 +5,20 @@
 
     import { type MetaMask } from "$lib"
     import { addGruntFund, loadSettings, type Settings, toMenuOptions } from "$lib/settings"
-    import { Button, TextField, Notification } from "svelte-ux"
+    import { Button, TextField, Notification, type MenuOption } from "svelte-ux"
+    import SelectOrCreate from "./SelectOrCreate.svelte";
 
     type Props = {
         settings : Settings,
         account : MetaMask
     }
 
-    let { account} : Props = $props()
+    let { account, settings } : Props = $props()
 
     const abi = contractData.abi
     const bytecode = contractData.bytecode
 
-
+    let gruntOptions : MenuOption[] = $derived(settings ? toMenuOptions((settings as Settings).grunts) : [])
     let saving = $state(false)
     let message = $state('')
     let name = $state("foo")
@@ -57,7 +58,11 @@
 
 <TextField class="m-2 w-1/2" label="Fund Name:" bind:value={name} />
 <TextField class="m-2 w-1/2" label="Symbol:" bind:value={symbol} />
-<TextField class="m-2 w-1/2" label="Owner Address:" bind:value={owner} />
+<!-- <TextField class="m-2 w-1/2" label="Owner Address:" bind:value={owner} /> -->
+
+<div class="m-2 w-1/2">
+    <SelectOrCreate label="Contracta Owner" options={gruntOptions} bind:value={owner} />
+  </div>
 <Button disabled={saving} variant="fill" color="primary" class="m-2" onclick={() => onDeploy()} >Deploy</Button>
 
 {#if message}
