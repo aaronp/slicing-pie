@@ -4,6 +4,7 @@
     import { onMount } from "svelte";
 
     import { GruntFund } from "./GruntFund"
+    import Permissions from "./Permissions.svelte"
 
     import { ethers } from "ethers";
     import contractData from "../../../artifacts/contracts/KindFund.sol/KindFund.json"
@@ -17,7 +18,7 @@
         account : MetaMask
     }
 
-    let { account} : Props = $props()
+    let { account, settings} : Props = $props()
 
     const abi = contractData.abi
     const bytecode = contractData.bytecode
@@ -27,7 +28,6 @@
     let gruntFundAddressToPermission = $state("")
     let message = $state("")
     let saving = $state(false)
-    let settings : Settings | null = $state(null)
     let newContractAddress = $state("")
 
     const onDeploy = async () => {
@@ -88,15 +88,6 @@
     let fundOptions : MenuOption[] = $derived(settings ? toMenuOptions((settings as Settings).funds) : [])
     let gruntOptions : MenuOption[] = $derived(settings ? toMenuOptions((settings as Settings).grunts) : [])
 
-    const onCreate = (newOption : MenuOption) => {
-      console.log(`...... creating ${JSON.stringify(newOption)}`)
-      if (settings) {
-        settings.funds[newOption.label] = newOption.value + "!!!"
-        saveSettings(settings)
-        settings = settings
-      }
-    }
-
     onMount(() => {
       settings = loadSettings()
       newContractAddress = settings.kindContractAddress
@@ -114,6 +105,10 @@
 
 <!-- <TextField class="m-2 w-1/2" label="Kind Address:" bind:value={newContractAddress} /> -->
 <Button disabled={saving} variant="fill" color="primary" class="m-2" onclick={() => onDeploy()} >Deploy</Button>
+
+<div>
+  <Permissions {account} {settings} />
+</div>
 
 {#if message}
     <Notification title={message} />
