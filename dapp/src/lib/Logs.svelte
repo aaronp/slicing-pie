@@ -18,9 +18,14 @@
     let gruntSymbol = $state('')
     onMount(async () => {
       events = (await gruntFund.events())
-      gruntSymbol = await gruntFund.getSymbol()
-
       pending = await listAndUpdatePendingTransactions(gruntFund.provider)
+      
+      try {
+        gruntSymbol = await gruntFund.getSymbol()
+      } catch (e) {
+        console.error(`error loading symbol: ${e}`)
+      }
+
     })
   
     const pendingDetails = $derived(pending.map((e) => {
@@ -62,6 +67,9 @@
   
   </script>
   
+  {#if eventDetails.length == 0}
+  <p>No events found</p>
+  {:else}
   <Timeline vertical compact snapPoint>
     {#each eventDetails as item, i}
       <TimelineEvent
@@ -83,4 +91,4 @@
       </TimelineEvent>
     {/each}
   </Timeline>
-  
+  {/if}

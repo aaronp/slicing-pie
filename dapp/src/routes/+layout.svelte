@@ -16,7 +16,10 @@ import {
 	mdiHome,
 	mdiLaunch,
 	mdiGroup,
-    mdiCurrencyMnt
+    mdiCurrencyMnt,
+
+    mdiNetwork
+
 } from '@mdi/js'
 
 import { onMount } from "svelte"
@@ -81,6 +84,10 @@ settings({
 				<NavItem icon={mdiCurrencyMnt} text={fund.label} currentUrl={$page.url} path="/fund/{fund.address}" ></NavItem>
 			</div>
 			{/each}
+			<div class="self-start m-2 text-white">
+				<NavItem icon={mdiNetwork} text="Kind Events" currentUrl={$page.url} path="/group" ></NavItem>
+			</div>
+
 
 		</div>
 	</svelte:fragment>

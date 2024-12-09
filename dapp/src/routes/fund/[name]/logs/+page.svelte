@@ -1,6 +1,6 @@
 <script lang="ts">
     import { type MetaMask, connectToMetaMask, idFromPath } from "$lib"
-    import { type Settings, loadSettings, splitMapping } from "$lib/settings"
+    import { type Settings, loadSettings, toLabels } from "$lib/settings"
     import { GruntFund } from "$lib/GruntFund"
     import { onMount } from "svelte"
     import Logs from "$lib/Logs.svelte"
@@ -30,11 +30,10 @@
           gruntFund = await GruntFund.forSettings(id, account)
         }
 
-        const grunts =  splitMapping(settings.grunts)
+        const grunts =  toLabels(settings.grunts)
         grunts.forEach(grunt => {
             gruntLabelByAddress.set(grunt.address, grunt.label)
         })
-        // gruntLabelByAddress = new Map(gruntLabelByAddress)
     })
 
 </script>

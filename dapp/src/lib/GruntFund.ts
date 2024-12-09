@@ -134,16 +134,6 @@ export class GruntFund {
     return await this.contract.getAllAddresses()
   }
 
-  private wrapSync<A>(closure: () => A): A {
-    try {
-      const response = closure()
-      return response
-    } catch (error) {
-      console.error("An error occurred:", error)
-      throw error
-    }
-  }
-
   private async wrapASync<A> (fn : string, closure: () => Promise<A>): Promise<A> {
     try {
       console.log(`>>> Calling ${fn}`)
