@@ -89,4 +89,41 @@ export class KindFund {
   ): Promise<ethers.ContractTransaction> {
     return await this.contractWithSigner.mint(recipient, fund, amount, documentHash)
   }
+
+
+
+  async events(from : string = 'earliest') : Promise<EventData[]> {
+    const filter = {
+      address: await this.contract.getAddress(),
+      fromBlock: from,
+      toBlock: 'latest',
+    }
+
+    const iface = new ethers.Interface(abi)
+    const logs = await this.provider.getLogs(filter)
+
+    const payloads = Promise.all(logs.map(async  (log) => {
+      const parsedLog = iface.parseLog(log)
+
+      const block = await this.provider.getBlock(log.blockNumber)
+
+      // Extract timestamp from the block
+      const timestamp = block.timestamp
+
+      // Convert the timestamp to a human-readable date
+      const date = new Date(timestamp * 1000)
+
+      const args = parsedLog?.args.toObject()
+      const mappedArgs = Object.keys(args).reduce((acc, key) => {
+        acc[key] = args[key].toString()
+        return acc
+      }, {});
+      return {
+        event: parsedLog.name,
+        args: mappedArgs,
+        timestamp : date
+      }
+    }))
+    return payloads
+  }
 }

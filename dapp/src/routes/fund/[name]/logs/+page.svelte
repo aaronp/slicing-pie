@@ -17,7 +17,8 @@
     let account : MetaMask | null = $state(null)
     let gruntFund : GruntFund | null = $state(null)
 
-    let gruntLabelByAddress = $state(new Map<string, string>())
+    let gruntAliasByAddress = $state(new Map<string, string>())
+    let fundAliasByAddress = $state(new Map<string, string>())
 
     onMount(async () => {        
         settings = loadSettings()
@@ -30,16 +31,20 @@
           gruntFund = await GruntFund.forSettings(id, account)
         }
 
-        const grunts =  toLabels(settings.grunts)
-        grunts.forEach(grunt => {
-            gruntLabelByAddress.set(grunt.address, grunt.label)
+        toLabels(settings.grunts).forEach(next => {
+          gruntAliasByAddress.set(next.address, next.label)
         })
+
+        toLabels(settings.funds).forEach(next => {
+          fundAliasByAddress.set(next.address, next.label)
+        })
+
     })
 
 </script>
 
 {#if gruntFund}
-  <Logs {gruntFund} gruntAliasByAddress={gruntLabelByAddress} />
+  <Logs contract={gruntFund} {gruntAliasByAddress} {fundAliasByAddress} />
 {/if}
 
 <Button variant="outline" color="secondary" onclick={() => goto(`${$page.url.pathname.split('/').slice(0, -1).join('/')}`)}>Back</Button>

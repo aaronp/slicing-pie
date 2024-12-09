@@ -17,7 +17,11 @@ import { GruntFund } from "$lib/GruntFund"
   let fundLabel : string = $state('')
 
   onMount(async () => {
-    fundLabel = await gruntFund.getSymbol()
+    try {
+      fundLabel = await gruntFund.getSymbol()
+    } catch (e) {
+      console.log(`balances got an error reading the fund label: ${e}`)
+    }
   })
 
   let balanceData = $derived(balances.map((b) => {

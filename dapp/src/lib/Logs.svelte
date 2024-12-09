@@ -3,27 +3,30 @@
     import { onMount } from "svelte"
     import { Timeline, TimelineEvent } from "svelte-ux"
     import { mdiAbacus, mdiArrowRight, mdiCheckCircle, mdiCross } from '@mdi/js'
-    import { listAndUpdatePendingTransactions, type TransactionStatus } from "./pendingTransactions";
+    import { listAndUpdatePendingTransactions, type TransactionStatus } from "./pendingTransactions"
+    import type { KindFund } from "./KindFund"
   
     type Props = {
-      gruntFund : GruntFund
+      contract : GruntFund | KindFund
       gruntAliasByAddress : Map<String, String>
+      fundAliasByAddress : Map<String, String>
     }
 
-    let { gruntFund, gruntAliasByAddress } : Props = $props()
+    let { contract, gruntAliasByAddress, fundAliasByAddress } : Props = $props()
   
     let events : EventData[] = $state([])
     let pending : TransactionStatus[] = $state([])
   
     let gruntSymbol = $state('')
     onMount(async () => {
-      events = (await gruntFund.events())
-      pending = await listAndUpdatePendingTransactions(gruntFund.provider)
+      events = contract instanceof GruntFund ? await contract.events() : await (contract as KindFund).events()
+      const provider = contract instanceof GruntFund ? contract.provider : (contract as KindFund).provider
+      pending = await listAndUpdatePendingTransactions(provider)
       
-      try {
-        gruntSymbol = await gruntFund.getSymbol()
-      } catch (e) {
-        console.error(`error loading symbol: ${e}`)
+      if (contract instanceof GruntFund) {
+        gruntSymbol = await contract.getSymbol()
+      } else {
+        gruntSymbol = 'GROUP'
       }
 
     })
@@ -43,7 +46,7 @@
     const fundDetails = $derived(events.map((e) => {
 
         let icon = mdiAbacus
-        let description = JSON.stringify(e.args)
+        let description = ''
         if (e.event == "Allocated") {
             icon = mdiCheckCircle
             const name = gruntAliasByAddress.get(e.args.recipient) ?? e.args.recipient
@@ -53,6 +56,13 @@
             const to = gruntAliasByAddress.get(e.args.to) ?? e.args.to
             description = `Transfered ${e.args.amount} ${gruntSymbol} from ${from} to ${to}`
             icon = mdiArrowRight
+        } else if (e.event == "Minted") {
+            const person = gruntAliasByAddress.get(e.args.person) ?? e.args.person
+            const fundAddress = fundAliasByAddress.get(e.args.fundAddress) ?? e.args.fundAddress
+            description = `${person} earned ${e.args.amount} ${gruntSymbol} in the Group Fund and ${fundAddress}`
+            icon = mdiArrowRight
+        } else {
+          description = `${e.args}`
         }
 
         return {

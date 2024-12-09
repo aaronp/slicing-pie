@@ -1,21 +1,21 @@
 <script lang="ts">
 
-import { type MetaMask, idFromPath, connectToMetaMask } from "$lib"
+import { type MetaMask, connectToMetaMask } from "$lib"
 import { type Settings, loadSettings, toLabels } from "$lib/settings"
 import { GruntFund } from "$lib/GruntFund"
 import Logs from "$lib/Logs.svelte"
 import { onMount } from "svelte"
-import { page } from '$app/stores'
+    import { KindFund } from "$lib/KindFund";
 
-let pageName : string = $derived($page.url.pathname)
-let fundAddress = $derived(idFromPath(pageName, 0))
 
 let message = $state('')
 
 let settings : Settings | null = $state(null)
 let account : MetaMask | null = $state(null)
-let gruntFund : GruntFund | null = $state(null)
-let gruntLabelByAddress = $state(new Map<string, string>())
+let kindFund : KindFund | null = $state(null)
+let kindFunds : string[] = $state([])
+let gruntAliasByAddress = $state(new Map<string, string>())
+let fundAliasByAddress = $state(new Map<string, string>())
 
 onMount(async () => {        
     settings = loadSettings()
@@ -26,16 +26,28 @@ onMount(async () => {
     } else {
         account = connectResult as MetaMask
     }
-    const grunts =  toLabels(settings.grunts)
-    grunts.forEach(grunt => {
-        gruntLabelByAddress.set(grunt.address, grunt.label)
+
+    toLabels(settings.grunts).forEach(next => {
+        gruntAliasByAddress.set(next.address, next.label)
     })
-    gruntFund = await GruntFund.forAddress(settings.kindContractAddress)
+
+    toLabels(settings.funds).forEach(next => {
+        fundAliasByAddress.set(next.address, next.label)
+    })
+
+
+    kindFund = await KindFund.forAddress(settings.kindContractAddress)
+    kindFunds = await kindFund.getAllFunds()
 })
 </script>
 
-{#if gruntFund}
-    <Logs {gruntFund} gruntAliasByAddress={gruntLabelByAddress} />
+{kindFunds.length} fund(s) in the group:
+{#each kindFunds as address}
+    <p>{toLabels(settings?.funds ?? {}).find(e => e.address == address)?.label ?? address}</p>
+{/each}
+
+{#if kindFund}
+    <Logs contract={kindFund} {gruntAliasByAddress} {fundAliasByAddress}  />
 {:else}
     <p>Loading...</p>
 {/if}
