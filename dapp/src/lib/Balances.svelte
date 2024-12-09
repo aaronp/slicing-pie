@@ -39,8 +39,6 @@
   let isApprover = $state(false)
   let approveTooltip = $derived(isApprover ? 'Approve submitted allocation requests' : 'Only approvers have this option')
 
-  let gruntLabelByAddress = $state(new Map<string, string>())
-
   let fundName : string = $state('')
   let fundSymbol : string = $state('')
 
@@ -89,14 +87,7 @@
         return Number(a) + Number(b)
     }, 0)
 
-    const ia = await gruntFund.isAllowedMinter(account.signerAddress)
-    console.log(`${account.signerAddress} is approver: ${ia}`)
-    isApprover = ia
-
-    const grunts =  splitMapping(settings.grunts)
-    grunts.forEach(grunt => {
-        gruntLabelByAddress.set(grunt.address, grunt.label)
-    })
+    isApprover = await gruntFund.isAllowedMinter(account.signerAddress)
 
   })
 

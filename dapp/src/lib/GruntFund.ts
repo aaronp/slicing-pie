@@ -1,6 +1,7 @@
 import { ethers } from "ethers"
-import { type Settings as AppSettings, type MetaMask } from "$lib"
-import { KindFund } from "./KindFund";
+import { type MetaMask } from "$lib"
+import { KindFund } from "./KindFund"
+import { persistPendingTransaction } from "./pendingTransactions"
 
 
 const abi = [
@@ -14,13 +15,11 @@ const abi = [
   "function removeMinter(address) external",
   "function mint(address, uint256, string) external",
   "function transfer(address, uint256, string) external",
-  "function forceTransfer(address, address, uint256, string) external",
   "function getAllAddresses() external view returns (address[] memory)",
   "event MinterAdded(address indexed minter)",
   "event MinterRemoved(address indexed minter)",
   "event Allocated(address indexed recipient, uint256 amount, string documentHash)",
-  "event Transfer(address indexed from, address indexed to, uint256 amount, string documentHash)",
-  "event ForcedTransfer(address indexed from, address indexed to, uint256 amount, string documentHash)"
+  "event Transfer(address indexed from, address indexed to, uint256 amount, string documentHash)"
 ]
 export type EventData = {
   event: string;
@@ -67,8 +66,7 @@ export class GruntFund {
   async mintForKindFund(kindAddress : string, recipient : string, amount : ethers.BigNumberish, documentHash : string) {
     const kind = new KindFund(kindAddress, this.provider, this.signer)
     const thisAddress = await this.contract.getAddress()
-    const result = await kind.mint(recipient, thisAddress, amount, documentHash)
-    return result
+    return await this.wrapASync(`mintForKindFund(${kindAddress}, ${recipient}, ${amount}, ${documentHash})`, async () => kind.mint(recipient, thisAddress, amount, documentHash))
   }
   
   // Read-only methods
@@ -133,19 +131,52 @@ export class GruntFund {
   }
 
   async getAllAddresses(): Promise<string[]> {
-    const addresses = await this.contract.getAllAddresses()
-    return addresses
+    return await this.contract.getAllAddresses()
+  }
+
+  private wrapSync<A>(closure: () => A): A {
+    try {
+      const response = closure()
+      return response
+    } catch (error) {
+      console.error("An error occurred:", error)
+      throw error
+    }
+  }
+
+  private async wrapASync<A> (fn : string, closure: () => Promise<A>): Promise<A> {
+    try {
+      console.log(`>>> Calling ${fn}`)
+      const response = await closure()
+      console.log(`>>> ${fn} returned ${typeof response}: \n${JSON.stringify(response, null, 2)}\n\n`)
+      
+      if (typeof response === 'object' && 'hash' in response) {
+        const txnHash = response.hash
+        if (txnHash) {
+          try {
+            persistPendingTransaction(txnHash, fn, response as Record<string, any>)
+          } catch(e) {
+            console.error(`error persisting pending transaction ${txnHash}: ${e}`)
+          }
+        }
+      } else {
+        console.log(`not saving pending response as ${typeof response} and ${'hash' in response} don't pass`)
+      }
+      return response
+    } catch (error) {
+      console.error("An error occurred:", error)
+      throw error
+    }
   }
 
   // Write methods
   async addMinter(minterAddress: string): Promise<ethers.ContractTransaction> {
-    // const contractWithSigner = this.contract.connect(signer)
-    return await this.contractWithSigner.addMinter(minterAddress)
+    return await this.wrapASync(`addMinter(${minterAddress})`, async () => this.contractWithSigner.addMinter(minterAddress))
   }
 
   async removeMinter(minterAddress: string): Promise<ethers.ContractTransaction> {
     // const contractWithSigner = this.contract.connect(signer)
-    return await this.contractWithSigner.removeMinter(minterAddress)
+    return await this.wrapASync(`removeMinter(${minterAddress})`, async () => this.contractWithSigner.removeMinter(minterAddress))
   }
 
   async mint(
@@ -154,7 +185,7 @@ export class GruntFund {
     documentHash: string
   ): Promise<ethers.ContractTransaction> {
     // const contractWithSigner = this.contract.connect(signer)
-    return await this.contractWithSigner.mint(recipient, amount, documentHash)
+    return await this.wrapASync(`mint(${recipient}, ${amount}, ${documentHash})`, async () => this.contractWithSigner.mint(recipient, amount, documentHash))
   }
 
   async transfer(
@@ -163,16 +194,6 @@ export class GruntFund {
     documentHash: string
   ): Promise<ethers.ContractTransaction> {
     // const contractWithSigner = this.contract.connect(this.signer)
-    return await this.contractWithSigner.transfer(to, amount, documentHash)
-  }
-
-  async forceTransfer(
-    from: string,
-    to: string,
-    amount: ethers.BigNumberish,
-    documentHash: string
-  ): Promise<ethers.ContractTransaction> {
-    // const contractWithSigner = this.contract.connect(signer)
-    return await this.contractWithSigner.forceTransfer(from, to, amount, documentHash)
+    return await this.wrapASync(`transfer(${to}, ${amount}, ${documentHash})`, async () => this.contractWithSigner.transfer(to, amount, documentHash))
   }
 }

@@ -94,8 +94,8 @@ export const loadSettings = () : Settings => {
 
 
 export const saveSettings = (s : Settings) => {
-  const id = (new Date()).toISOString()
+  // const id = (new Date()).toISOString()
   // keep a back-up. TODO - clean up old copies!
-  localStorage.setItem(`grunt-settings-${id}`, JSON.stringify(s))
+  // localStorage.setItem(`grunt-settings-backup`, JSON.stringify(s))
   localStorage.setItem('grunt-settings', JSON.stringify(s))
 }

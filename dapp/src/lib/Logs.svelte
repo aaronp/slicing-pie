@@ -2,7 +2,8 @@
     import { GruntFund, type EventData } from "$lib/GruntFund"
     import { onMount } from "svelte"
     import { Timeline, TimelineEvent } from "svelte-ux"
-    import { mdiAbacus, mdiArrowRight, mdiCheckCircle } from '@mdi/js'
+    import { mdiAbacus, mdiArrowRight, mdiCheckCircle, mdiCross } from '@mdi/js'
+    import { listPendingTransactions, type TransactionStatus } from "./pendingTransactions";
   
     type Props = {
       gruntFund : GruntFund
@@ -12,14 +13,29 @@
     let { gruntFund, gruntAliasByAddress } : Props = $props()
   
     let events : EventData[] = $state([])
+    let pending : TransactionStatus[] = $state([])
   
     let gruntSymbol = $state('')
     onMount(async () => {
       events = (await gruntFund.events())
       gruntSymbol = await gruntFund.getSymbol()
+
+      pending = await listPendingTransactions(gruntFund.provider)
     })
   
-    const eventDetails = $derived(events.map((e) => {
+    const pendingDetails = $derived(pending.map((e) => {
+      const timestamp = new Date(e.pendingTransaction.timestamp)
+      const description = JSON.stringify(e.pendingTransaction.submittedTransaction, null, 2)
+      let icon = e.status === "pending" ? mdiArrowRight : (e.status === "confirmed" ? mdiCheckCircle : mdiCross)
+      return {
+            date : `${timestamp.toLocaleDateString()} ${timestamp.toLocaleTimeString()}`,
+            title : `${e.status} : ${e.pendingTransaction.functionCall}`,
+            description,
+            icon
+        }
+    }))
+
+    const fundDetails = $derived(events.map((e) => {
 
         let icon = mdiAbacus
         let description = JSON.stringify(e.args)
@@ -41,6 +57,8 @@
             icon
         }
     }))
+
+    const eventDetails = $derived([...fundDetails, ...pendingDetails])
   
   </script>
   

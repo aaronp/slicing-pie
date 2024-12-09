@@ -4,15 +4,16 @@ import { ethers } from "ethers"
 const PENDING_TX_KEY = "pending_transactions"
 
 // Type definition for a transaction object
-interface PendingTransaction {
+export type PendingTransaction = {
   hash: string
-  timestamp: number
+  timestamp: number,
+  functionCall : string,
   status: "pending" | "confirmed" | "failed"
   submittedTransaction: Record<string, any>
 }
 
 // Type definition for transaction status object
-interface TransactionStatus {
+export type TransactionStatus = {
   pendingTransaction: PendingTransaction
   currentStatus: ethers.TransactionReceipt | null
   status: "pending" | "confirmed" | "failed"
@@ -45,7 +46,7 @@ export function removePendingTransactions(transactions: PendingTransaction[]): v
  * @param txHash The transaction hash
  * @param submittedTransaction Arbitrary JSON object representing the submitted transaction
  */
-export function persistPendingTransaction(txHash: string, submittedTransaction: Record<string, any>): void {
+export function persistPendingTransaction(txHash: string, functionCall : string, submittedTransaction: Record<string, any>): void {
   const all = getAllTransactions()
 
   // Add the new transaction only if it's not already in the list
@@ -53,6 +54,7 @@ export function persistPendingTransaction(txHash: string, submittedTransaction: 
     const newTx: PendingTransaction = {
       hash: txHash,
       timestamp: Date.now(),
+      functionCall,
       status: "pending",
       submittedTransaction
     }
