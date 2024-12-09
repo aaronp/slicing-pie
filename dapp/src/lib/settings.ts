@@ -50,14 +50,13 @@ export const toTextFromLabels = (array : LabeledAddress[]) => array.map(({ label
 
 export const splitMapping = (content : string) : Record<string, string> => {
   let record : Record<string, string> = {}
-  content.split('\n')
+  content?.split('\n')
       .map(line => line.trim())
       .filter(line => line.includes(':'))
       .forEach(line => {
           const [label, address] = line.split(':').map(part => part.trim())
           record[label] = address
       })
-      console.log(`splitMapping:\n${content}\n\nreturned\n${JSON.stringify(record, null, 2)}`)
   return record
 }
 

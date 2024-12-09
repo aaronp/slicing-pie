@@ -115,9 +115,6 @@
 {/if}
 
 <Toggle let:on={open} let:toggle let:toggleOff>
-    <!-- <Button icon={mdiTrashCan} on:click={toggle} color="danger">Delete</Button> -->
-    <p>This contract needs to be granted permission to mint tokens on child grunts funds</p>
-    <p>Use this function to permission existing grunt fund addresses</p>
     <Button disabled={newContractAddress.length == 0} variant="fill" color="primary" class="m-2" onclick={toggle} >Add Permission to Mint</Button>
     <Dialog classes={{
       dialog: "w-full bg-blue-500",

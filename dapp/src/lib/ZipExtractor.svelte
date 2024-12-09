@@ -13,7 +13,8 @@
     mdiCheckCircleOutline
   } from '@mdi/js'
 
-  import { toMap, type MetaMask, type Settings } from '$lib';
+  import {  type MetaMask } from '$lib'
+  import { toLabels, toMap, type Settings } from '$lib/settings'
   import JSZip from 'jszip'
 
     
@@ -27,8 +28,8 @@
 
   let { settings, gruntFund, onBack } : Props = $props()
 
-  let gruntsByAddress = toMap(settings.grunts)
-  let fundsByAddress = toMap(settings.funds)
+  let gruntsByAddress = toLabels(settings.grunts)
+  let fundsByAddress = toLabels(settings.funds)
 
   let uploadMetadata : UploadMetadata | null = $state(null)
   let signatureUpload : SignedUpload | null = $state(null)
@@ -111,12 +112,15 @@
     }
   }
 
-  const fundName = (address : string) => fundsByAddress.get(address) ?? address
-  const gruntName = (address : string) => gruntsByAddress.get(address) ?? address
+  const fundName = (address : string) => fundsByAddress.find(e => e.address == address)?.label ?? address
+  const gruntName = (address : string) => gruntsByAddress.find(e => e.address == address)?.label ?? address
 
   const handleDragOver = (event) => event.preventDefault()
 
   const mintToHoldingFund = async () => {
+    if (!uploadMetadata || !signatureUpload) {
+      throw new Error("Bug: null uploadMetadata or signatureUpload")
+    }
     try {
         const response = await gruntFund?.mintForKindFund(settings.kindContractAddress, uploadMetadata.publicKey, uploadMetadata.impliedFundAmount, signatureUpload.signature)
         console.log(`submitted ${JSON.stringify(response)}`)

@@ -13,17 +13,14 @@ import {
 import {
 	mdiWeb,
 	mdiCog,
-	mdiAccount,
 	mdiHome,
 	mdiLaunch,
 	mdiGroup,
-
     mdiCurrencyMnt
-
 } from '@mdi/js'
 
 import { onMount } from "svelte"
-import { type LabeledAddress, type Settings, loadSettings, splitMapping } from "$lib/settings"
+import { type LabeledAddress, type Settings, loadSettings, splitMapping, toLabels } from "$lib/settings"
 import { page } from '$app/stores'
 import '../app.postcss'
 let appSettings : Settings | null = $state(null)
@@ -34,7 +31,7 @@ let funds : LabeledAddress[] = $state([])
 // Check if contractAddress exists in localStorage on component mount
 onMount(async () => {
 	appSettings = loadSettings()
-	funds = splitMapping(appSettings.funds)
+	funds = toLabels(appSettings.funds)
 })
 
 

@@ -40,7 +40,6 @@
     {/if}
 
 {#key fundAddress}
-id is {fundAddress}
     {#if settings != null && account != null}
         <Balances {account} {settings} {fundAddress} />
     {/if}

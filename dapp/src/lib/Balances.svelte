@@ -2,7 +2,7 @@
   import { goto } from "$app/navigation";
 
   import { type MetaMask} from "$lib"
-  import { type Settings, splitMapping } from "$lib/settings"
+  import { type Settings, splitMapping, toLabels } from "$lib/settings"
   import { GruntFund } from "$lib/GruntFund"
   import { onMount } from "svelte"
   import Pie from "./Pie.svelte"
@@ -51,7 +51,7 @@
     fundSymbol = await gruntFund.getSymbol()
     allAddresses = await gruntFund.getAllAddresses()
     
-    const gruntsByAddress = splitMapping(settings.grunts)
+    const gruntsByAddress = toLabels(settings.grunts)
 
     const insertBalance = (balanceArray: Balance[], newBalance: Balance): Balance[] => {
       // Find the correct index to insert the new balance
