@@ -3,7 +3,7 @@
     import { onMount } from "svelte"
     import { Timeline, TimelineEvent } from "svelte-ux"
     import { mdiAbacus, mdiArrowRight, mdiCheckCircle, mdiCross } from '@mdi/js'
-    import { listPendingTransactions, type TransactionStatus } from "./pendingTransactions";
+    import { listAndUpdatePendingTransactions, type TransactionStatus } from "./pendingTransactions";
   
     type Props = {
       gruntFund : GruntFund
@@ -20,7 +20,7 @@
       events = (await gruntFund.events())
       gruntSymbol = await gruntFund.getSymbol()
 
-      pending = await listPendingTransactions(gruntFund.provider)
+      pending = await listAndUpdatePendingTransactions(gruntFund.provider)
     })
   
     const pendingDetails = $derived(pending.map((e) => {

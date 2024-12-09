@@ -68,6 +68,20 @@ export function persistPendingTransaction(txHash: string, functionCall : string,
  * @param provider An ethers provider instance
  * @returns A promise that resolves to an array of TransactionStatus objects
  */
+export async function listAndUpdatePendingTransactions(provider: ethers.Provider): Promise<TransactionStatus[]> {
+  // Check and update the statuses of the transactions
+  const transactionStatuses: TransactionStatus[] = await listPendingTransactions(provider)
+
+  // Remove confirmed and failed transactions from localStorage
+  const pendingTxs = transactionStatuses
+    .filter(ts => ts.status === "pending")
+    .map(ts => ts.pendingTransaction)
+
+  save(pendingTxs)
+
+  return transactionStatuses
+}
+
 export async function listPendingTransactions(provider: ethers.Provider): Promise<TransactionStatus[]> {
   const storedTxs = getAllTransactions()
 
@@ -94,13 +108,5 @@ export async function listPendingTransactions(provider: ethers.Provider): Promis
     })
   )
 
-  // Remove confirmed and failed transactions from localStorage
-  const pendingTxs = transactionStatuses
-    .filter(ts => ts.status === "pending")
-    .map(ts => ts.pendingTransaction)
-
-  save(pendingTxs)
-
   return transactionStatuses
 }
-
