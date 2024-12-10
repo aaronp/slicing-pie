@@ -24,13 +24,14 @@
     })
 </script>
 
-<div class="m-2"><Button variant="outline" color="secondary" onclick={() => goto(`${$page.url.pathname.split('/').slice(0, -1).join('/')}`)}>Back</Button></div>
-<div class="text-center">
+<div >
     {message}
-    <p class="text-secondary text-bold text-xl m-8">Upload the document (timesheet, fund transfer, etc):</p>
+    <!-- <p class="text-secondary text-bold text-xl m-8">Upload the document (timesheet, fund transfer, etc):</p> -->
     {#if account}
         <SignedDocumentUpload {account} {fundAddress} />
     {:else}
         <p>Account is not connected</p>
     {/if}
 </div>
+
+<div class="mt-12"><Button variant="outline" color="secondary" onclick={() => goto(`${$page.url.pathname.split('/').slice(0, -1).join('/')}`)}>Back</Button></div>

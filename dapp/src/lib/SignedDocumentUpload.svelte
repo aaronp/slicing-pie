@@ -1,5 +1,11 @@
 <script lang="ts">
+    
+    import { defaultSettings, loadSettings, type Settings } from "./settings";
+
+    import { onMount } from "svelte";
+
     import type { BytesLike } from "ethers"
+    import Calculator from "$lib/Calculator.svelte"
 
     import { type MetaMask } from "$lib"
     import { type UploadMetadata, type SignedUpload, type DocLink, signDoc } from "./docsign"
@@ -22,6 +28,20 @@
 
     let message = $state('')
   
+    // for the amont calculator
+    let pie = $state(0)
+    let category = $state('')
+    let role = $state('')
+    let roleDesc = $derived(role && category == 'Time' ? `(${role})` : "")
+    let amount = $state(0)
+
+
+    let settings : Settings = $state(defaultSettings())
+
+    onMount(() => {
+      settings = loadSettings()
+    })
+
     const signDocument = async () => {
       if (!droppedFile) return
 
@@ -96,7 +116,7 @@
         // let pastedImage = null
         // let pastedFile = null
 
-        let fileName = 'pasted'
+        let fileName = 'Text'
         let pastedBytes : BytesLike = ''
 
         // Check for image in the clipboard
@@ -188,10 +208,17 @@
 
   </script>
   
+  <div class="flex flex-col space-y-4 my-8">
+    <h4>Pie Amount:</h4>
+    <Calculator categoies={settings?.categories ?? []} rates={settings?.rates ?? []} bind:pie={pie} bind:role={role} bind:category={category} bind:amount={amount}/>
+    <div class="text-xl opacity-50">{category} {roleDesc} @ {amount} = {pie}</div>
+  </div>
   <div class="flex flex-col items-center space-y-4">
     {#if message}
       <p>{message}</p>
     {/if}
+
+    
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
       tabindex="0" 
@@ -208,7 +235,7 @@
       </p>
     {:else}
       <p class="text-center text-gray-500">
-        Drag and drop your document here, or click to upload.
+        Drag and drop or paste associated documents here
       </p>
     {/if}
     </div>

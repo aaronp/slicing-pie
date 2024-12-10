@@ -49,7 +49,7 @@
         
         const found = categoies.find(c => c.label == chosenCategory)
         const multiplier = found?.amount ?? 1
-        const timeMultiplier = rates.find(r => r.label === chosenRole)?.amount ?? 1
+        const timeMultiplier = rates.find(r => r.label === chosenRole)?.amount ?? 0
 
         // console.log(`calculating w/ userAmount=${userAmount}, timeMultiplier=${timeMultiplier}, category=${category}, multiplier=${multiplier}`)
         if (chosenCategory === firstCategory) {

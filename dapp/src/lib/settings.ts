@@ -25,7 +25,7 @@ export type Settings = {
   kindContractAddress : string
 }
 
-const defaultSettings = () : Settings => {
+export const defaultSettings = () : Settings => {
   return {
     grunts : {},
     funds : {},
