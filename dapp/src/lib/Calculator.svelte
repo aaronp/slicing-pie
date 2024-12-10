@@ -1,18 +1,23 @@
 <script lang="ts">
-    import { TextField, Field, SelectField, MenuItem, cls} from "svelte-ux"
-    import { mdiPlus } from '@mdi/js'
+    import { Icon, TextField, Field, SelectField, MenuItem, cls} from "svelte-ux"
+    import { mdiCurrencyUsd, mdiCurrencyGbp, mdiCurrencySign, mdiClock, mdiFinance, mdiAccount, mdiCar, mdiTrain, mdiPercent, mdiSecurity, mdiOfficeBuilding } from '@mdi/js'
     import type { LabeledAmount } from "./settings"
         
     type Props = {
         categoies : LabeledAmount[]
         rates : LabeledAmount[]
-        amount : number
+        // category : number,
+        // amount : number,
+        category : string,
+        role : string,
+        amount : number,
+        pie : number,
     }
 
 
     let userAmount : number = $state(0)
 
-    let { categoies, rates, amount = $bindable() } : Props = $props()
+    let { categoies, rates, role = $bindable(), category = $bindable(), amount = $bindable(), pie = $bindable() } : Props = $props()
 
     let categoryOptions = $derived(categoies.map(c => {
         return {
@@ -22,38 +27,83 @@
     }))
 
     let firstCategory = $derived(categoies.length == 0 ? '' : categoies[0].label)
-    let category = $state(categoies.length == 0 ? '' : categoies[0].label)
+    let chosenCategory = $state(categoies.length == 0 ? '' : categoies[0].label)
 
     let roles = $derived(rates.map(r => {
         return {
             label : r.label,
-            value : r.amount
+            value : r.label
         }
     }))
 
-    let timeMultiplier = $state(0)
+    // the amount icon
+    let symbol = $state('')
+    let amountLabel = $state("Amount")
+    
+    let chosenRole = $state('')
 
     $effect(() => {
-        const found = categoies.find(c => c.label == category)
+        category = chosenCategory
+        role = chosenRole
+        amount = userAmount
+        
+        const found = categoies.find(c => c.label == chosenCategory)
         const multiplier = found?.amount ?? 1
+        const timeMultiplier = rates.find(r => r.label === chosenRole)?.amount ?? 1
+
         // console.log(`calculating w/ userAmount=${userAmount}, timeMultiplier=${timeMultiplier}, category=${category}, multiplier=${multiplier}`)
-        if (category.toLowerCase() === firstCategory) {
-            amount = timeMultiplier * userAmount
+        if (chosenCategory === firstCategory) {
+            pie = timeMultiplier * userAmount
         } else {
-            amount = multiplier * userAmount
+            pie = multiplier * userAmount
+        }
+
+        // TODO - map symbols in settings
+        switch (chosenCategory) {
+            case 'Time' : {
+                symbol = mdiClock
+                amountLabel = "Days"
+                break;
+            }
+            case 'Cash' : {
+                symbol = mdiCurrencyGbp
+                amountLabel = "GBP"
+                break;
+            }
+            case 'Debt Guarantee' : {
+                symbol = mdiFinance
+                amountLabel = "Loan Amount Guaranteed"
+                break;
+            }
+            case 'Assets' : {
+                symbol = mdiOfficeBuilding
+                amountLabel = "Asset Value"
+                break;
+            }
+            case 'Expenses' : {
+                symbol = mdiTrain
+                amountLabel = "Cost"
+                break;
+            }
+            case 'Sales Commission' : {
+                symbol = mdiPercent
+                amountLabel = "Commission Amount"
+                break;
+            }
+            default : {
+                symbol =  mdiCurrencySign
+                break;
+            }
         }
     })
     
 </script>
 
-<!--
-Category 
-md:grid-cols-[1fr auto 3fr]
--->
-<div class={cls(category === firstCategory ? "grid grid-cols-[auto,1fr,1fr] gap-2 w-3/4 bg-green-100" : "grid grid-cols-[auto,1fr] gap-2 w-3/4")}>
-    <div class="border">
+
+<div class={cls(chosenCategory === firstCategory ? "grid grid-cols-[auto,1fr,1fr] gap-2 w-3/4" : "grid grid-cols-[auto,1fr] gap-2 w-3/4")}>
+    <div class="border1">
         <Field label="Category" >
-            <SelectField options={categoryOptions} bind:value={category} >
+            <SelectField options={categoryOptions} bind:value={chosenCategory} >
                 <div slot="option" let:option let:index let:selected let:highlightIndex>
                     <MenuItem
                         scrollIntoView={index === highlightIndex} 
@@ -69,10 +119,10 @@ md:grid-cols-[1fr auto 3fr]
         </Field>
     </div>
 
-    {#if category===firstCategory}
-        <div class="border">
+    {#if chosenCategory===firstCategory}
+        <div class="border1">
             <Field label="Role" >
-                <SelectField options={roles} bind:value={timeMultiplier} >
+                <SelectField options={roles} bind:value={chosenRole} >
                     <div slot="option" let:option let:index let:selected let:highlightIndex>
                         <MenuItem
                             scrollIntoView={index === highlightIndex} 
@@ -87,12 +137,22 @@ md:grid-cols-[1fr auto 3fr]
                 </SelectField>
             </Field>
         </div>
-    {:else}
-        <!-- <div class=""></div> -->
     {/if}
 
-
-    <div class="border">
-        <TextField bind:value={userAmount} label="Amount" />
+    <div class="border1">
+        <TextField classes={{
+            input: "h-8 text-4xl mb-1",
+          }} bind:value={userAmount} label={amountLabel} >
+            
+            <div slot="prefix">
+                {#if symbol}
+                    <Icon
+                    data={symbol}
+                    size="1.8em"
+                    class="text-surface-content/50 -mt-1 mr-2"
+                    />
+                {/if}
+              </div>
+        </TextField>
     </div>
 </div>
