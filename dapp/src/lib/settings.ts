@@ -1,5 +1,12 @@
 import type { MenuOption } from "svelte-ux"
 
+
+export type LabeledAmount = {
+  label : string,
+  amount : number
+}
+
+
 // our application settings, saved to persistent (perhaps local) storage
 export type Settings = {
 
@@ -9,6 +16,11 @@ export type Settings = {
   // funds in a <name>:<address> format
   funds : Record<string, string>,
 
+  // e.g "Junior Dev", "Senior Marketing", "Mid UX/Designer", 
+  rates : LabeledAmount[],
+
+  categories : LabeledAmount[],
+
   // the kind group address
   kindContractAddress : string
 }
@@ -17,6 +29,15 @@ const defaultSettings = () : Settings => {
   return {
     grunts : {},
     funds : {},
+    rates : [],
+    categories : [
+      { label : 'Time', amount : 1 },
+      { label : 'Cash', amount : 4 },
+      { label : 'Assets', amount : 2 },
+      { label : 'Expenses', amount : 2 },
+      { label : 'Sales Commission', amount : 1 },
+      { label : 'Debt Guarantee', amount : 2 },
+    ],
     kindContractAddress : ''
   }
 }
@@ -45,6 +66,7 @@ export const toMenuOptions = (record : Record<string, string>) :  MenuOption[]  
   return {label, value : address}
 })
 
+export const amountsToText = (array : LabeledAmount[]) => array.map(n => `${n.label}:${n.amount}`).join('\n')
 export const toText = (array : Record<string, string>) => Object.entries(array).map(([label, address]) => `${label}:${address}`).join('\n')
 export const toTextFromLabels = (array : LabeledAddress[]) => array.map(({ label, address }) => `${label}:${address}`).join('\n')
 
@@ -60,6 +82,21 @@ export const splitMapping = (content : string) : Record<string, string> => {
   return record
 }
 
+export const splitAmounts = (content : string) : LabeledAmount[] => {
+  let array : LabeledAmount[] = []
+
+  content?.split('\n')
+      .map(line => line.trim())
+      .filter(line => line.includes(':'))
+      .forEach(line => {
+          const [label, amount] = line.split(':').map(part => part.trim())
+          array.push({
+            label,
+            amount: Number(amount)
+          })
+      })
+  return array
+}
 
 export const splitMappingAsLabels = (content : string) : LabeledAddress[] => {
     return content.split('\n')
