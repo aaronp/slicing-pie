@@ -4,6 +4,7 @@
 
   export type Section = {
     label : string,
+    amount: number,
     percent: number,
     fromDeg : number,
     toDeg : number

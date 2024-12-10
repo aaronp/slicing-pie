@@ -51,7 +51,12 @@ export const validateDoc  = async (uploadMetadata : UploadMetadata, signature : 
   return recoveredAddress.toLowerCase() === uploadMetadata.publicKey.toLowerCase()
 }
 
-export const signDoc = async (fileName : string, fundAddress : string, impliedFundAmount : number, account : MetaMask, fileContent : BytesLike) : Promise<[UploadMetadata, SignedUpload]> => {
+export const signDoc = async (
+  fileName : string, 
+  fundAddress : string, 
+  impliedFundAmount : number,
+  account : MetaMask, 
+  fileContent : BytesLike) : Promise<[UploadMetadata, SignedUpload]> => {
     const metadata = {
       fileName,
       fundAddress,

@@ -6,7 +6,10 @@
     import JSZip from "jszip"
 
 
-    let droppedFile = $state(null)
+    type FileLike = {
+      name : string
+    }
+    let droppedFile : FileLike | null = $state(null)
   
     type Props = {
       account : MetaMask,
@@ -21,6 +24,7 @@
   
     const signDocument = async () => {
       if (!droppedFile) return
+
       try {
         const signer = account.signer
         if (signer) {
@@ -32,27 +36,27 @@
 
           const [metadata, signedUpload] = await signDoc(droppedFile.name, fundAddress, impliedFundAmount, account, fileContent)
 
-          return await createAndDownloadZip(droppedFile, metadata, signedUpload)
+          return await createAndDownloadZip(fileContent, metadata, signedUpload)
         }
       } catch (error) {
         console.error("Error signing document:", error)
       }
     }
 
-    async function createAndDownloadZip(droppedFile, metadata : UploadMetadata, signedUpload : SignedUpload) {
+    async function createAndDownloadZip(originalFileContent : BytesLike, metadata : UploadMetadata, signedUpload : SignedUpload) {
       try {
         const zip = new JSZip()
         
         // Add the original file
-        const originalFileContent = await readFileAsByteArray(droppedFile)
-        zip.file(droppedFile.name, originalFileContent)
+        // const originalFileContent = await readFileAsByteArray(droppedFile)
+        zip.file(metadata.fileName, originalFileContent)
 
         // Add the signature file
         zip.file("metadata.json", JSON.stringify(metadata, null, 2))
         zip.file("signature.json", JSON.stringify(signedUpload, null, 2))
 
         // Add the hash file
-        const strippedName = droppedFile.name.replace(/\./g, '_')
+        const strippedName = metadata.fileName.replace(/\./g, '_')
 
         // Generate the ZIP file as a Blob
         const zipBlob = await zip.generateAsync({ type: "blob" })
@@ -64,6 +68,88 @@
 
       } catch (error) {
         message = `Error creating ZIP file: ${error}`
+      }
+    }
+
+    function convertBase64ToHex(base64: string): string {
+      // Decode Base64 string into binary data
+      const binary = atob(base64)
+      let hexString = ''
+
+      // Convert binary data to hexadecimal
+      for (let i = 0; i < binary.length; i++) {
+        const hex = binary.charCodeAt(i).toString(16).padStart(2, '0')
+        hexString += hex
+      }
+
+      return hexString
+    }
+    
+    const handlePaste = async (event) => {
+      // Prevent default behavior (optional, if you don't want the data to appear directly in the div)
+      event.preventDefault()
+
+      // Extract the clipboard data
+      const clipboardData = event.clipboardData || window.clipboardData
+
+      if (clipboardData) {
+        // let pastedImage = null
+        // let pastedFile = null
+
+        let fileName = 'pasted'
+        let pastedBytes : BytesLike = ''
+
+        // Check for image in the clipboard
+        const items = clipboardData.items
+        if (items) {
+          for (const item of items) {
+            if (item.type.startsWith('image/')) {
+              droppedFile = item.getAsFile()
+              if (droppedFile) {
+                fileName = droppedFile.name
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  // pastedImage = e.target.result // Base64 image data
+                  const content = e.target ? e.target.result?.toString() ?? 'null target result' : 'null target'// Base64 image data
+                  console.log(content.substring(0, 20) + '...')
+                  const v = convertBase64ToHex(content)
+                  console.log('buffered...')
+                  pastedBytes = v
+                  // pastedBytes = (new TextEncoder()).encode(content)
+
+                }
+                reader.readAsDataURL(droppedFile)
+                // return // Exit as we've found an image
+              }
+            } else if (item.kind === 'file') {
+              droppedFile = item.getAsFile()
+              if (droppedFile) {
+                fileName = droppedFile.name
+                // pastedFile = { name: file.name, type: file.type, size: file.size }
+                pastedBytes = await readFileAsByteArray(droppedFile)
+                console.log(`pasted data is a file: ${fileName}`)
+                // return // Exit as we've processed a file
+              }
+            }
+          }
+        }
+
+        if (!pastedBytes) {
+          pastedBytes = clipboardData.getData('text')
+          droppedFile = {
+            name : fileName
+          }
+          console.log(`pasted data is text`)
+        }
+
+        console.log(`signing pasted contents for ${fileName}`)
+
+        const impliedFundAmount = 123 // TODO - insert fund calculator to work out resulting PIE
+
+        const [metadata, signedUpload] = await signDoc(fileName, fundAddress, impliedFundAmount, account, pastedBytes)
+
+        return await createAndDownloadZip(pastedBytes, metadata, signedUpload)     
+
       }
     }
   
@@ -85,8 +171,8 @@
 
         // Handle successful file read
         reader.onload = () => {
-          const arrayBuffer = reader.result // ArrayBuffer
-          const byteArray = new Uint8Array(arrayBuffer) // Convert to byte array
+          const arrayBuffer = reader.result
+          const byteArray = new Uint8Array(arrayBuffer) 
           resolve(byteArray)
         }
 
@@ -103,16 +189,22 @@
   </script>
   
   <div class="flex flex-col items-center space-y-4">
-    {message}
+    {#if message}
+      <p>{message}</p>
+    {/if}
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
-      class="w-full max-w-md p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200 transition duration-200"
+      tabindex="0" 
+      contenteditable="true" 
+      class="w-full max-w-md p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200 transition duration-200 drop-area"
       ondrop={handleDrop}
       ondragover={handleDragOver}
+      onpaste={handlePaste}
     >
+    <!-- <input onpaste={handlePaste} /> -->
     {#if droppedFile}
       <p class="text-center text-gray-500 drop-target">
-        Dropped {droppedFile.name}
+        Uploaded {droppedFile.name}
       </p>
     {:else}
       <p class="text-center text-gray-500">
