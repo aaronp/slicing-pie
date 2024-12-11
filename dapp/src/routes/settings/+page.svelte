@@ -42,37 +42,38 @@
         return
       }
       let settings = loadSettings()
+
+      kindContractAddress = settings.kindContractAddress
+      funds = toText(settings.funds)
       grunts = toText(settings.grunts)
+      rates = amountsToText(settings.rates)
+      categories = amountsToText(settings.categories)
+
       gruntAddresses.set(grunts)
       gruntAddresses.subscribe(value => {
           grunts = value
           onSave()
       })
 
-      funds = toText(settings.funds)
       fundAddresses.set(funds)
       fundAddresses.subscribe(value => {
         funds = value
         onSave()
       })
 
-      rates = amountsToText(settings.rates)
+      
       ratesText.set(rates)
       ratesText.subscribe(value => {
         rates = value
         onSave()
       })
 
-      categories = amountsToText(settings.categories)
+      
       categoriesText.set(categories)
       categoriesText.subscribe(value => {
         categories = value
         onSave()
       })
-
-
-      kindContractAddress = settings.kindContractAddress
-
     })
 
   </script>

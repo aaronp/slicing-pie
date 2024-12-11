@@ -41,21 +41,24 @@
         try {
             const factory = new ethers.ContractFactory(abi, bytecode, account.signer)
 
-            console.log("Deploying contract...")
+            console.log("Deploying Kind contract...")
             const contract = await factory.deploy(_underlyingAddress, _owner)
-            console.log(`Deploy got ... ${JSON.stringify(contract, null, 2)}`)
+            console.log(`Kind Deploy got ... ${JSON.stringify(contract, null, 2)}`)
 
             newContractAddress = await contract.getAddress()
-            message = `Contract deployed successfully at address: ${newContractAddress}`
+            message = `Kind Contract deployed successfully at address: ${newContractAddress}`
             console.log(message)
 
             // update settings
             if (settings) {
               settings.kindContractAddress = newContractAddress
               saveSettings(settings)
+              console.log(`saved settings: ${JSON.stringify(settings, null, 2)}`)
+            } else {
+              console.error('cannot save settings')
             }
         } catch (error) {
-            message = `Deployment failed: ${error}`
+            message = `Kind Deployment failed: ${error}`
         }
         saving = false
         return newContractAddress

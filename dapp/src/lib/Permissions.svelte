@@ -44,8 +44,7 @@
   const addAsMinter = async (fundAddress : string, gruntAddress : string) => {
     let gruntFund = new GruntFund(fundAddress, account.provider, account.signer)
     try {
-      const response = await gruntFund.addMinter(gruntAddress)
-      message = `result: ${JSON.stringify(response, null, 2)}`
+      await gruntFund.addMinter(gruntAddress)
     } catch (e) {
       message = `${e}`
     }
@@ -54,8 +53,7 @@
   const removeAsMinter = async (fundAddress : string, gruntAddress : string) => {
     try {
       let gruntFund = new GruntFund(fundAddress, account.provider, account.signer)
-      const response = await gruntFund.removeMinter(gruntAddress)
-      message = `result: ${JSON.stringify(response, null, 2)}`
+      await gruntFund.removeMinter(gruntAddress)
     } catch (e) {
       message = `${e}`
     }

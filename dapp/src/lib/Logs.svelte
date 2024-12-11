@@ -61,6 +61,14 @@
             const fundAddress = fundAliasByAddress.get(e.args.fundAddress) ?? e.args.fundAddress
             description = `${person} earned ${e.args.amount} ${gruntSymbol} in the Group Fund and ${fundAddress}`
             icon = mdiArrowRight
+        } else if (e.event == "MinterRemoved") {
+            const person = gruntAliasByAddress.get(e.args.address) ?? (fundAliasByAddress.get(e.args.address) ?? e.args.address)
+            description = `${person} removed as a minter`
+            icon = mdiArrowRight
+        } else if (e.event == "MinterAdded") {
+            const person = gruntAliasByAddress.get(e.args.address) ??  (fundAliasByAddress.get(e.args.address) ?? e.args.address)
+            description = `${person} added as a minter`
+            icon = mdiArrowRight
         } else {
           description = `${e.args}`
         }
