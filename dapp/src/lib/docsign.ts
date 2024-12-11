@@ -3,12 +3,20 @@ import type { BytesLike } from "ethers"
 import { ethers } from "ethers"
 import { sha256, toUtf8Bytes } from "ethers"
 
+export type Pie = {
+  pie : number,
+  category : string, // the pie category (time, cash, debt, etc)
+  role : string | null, // if the category is time, this is the role of the grunt (CTO, marketing, UX, etc)
+  amount : number, // the value (hours, money, etc)
+  multiplier : number, // the multiplier of the category (e.g. 4x for cash, 1x for time)
+}
+
 export type UploadMetadata = {
     fileName : string,
     fundAddress : string,
     publicKey : string,
     timestamp  : string,
-    impliedFundAmount : number
+    allocation : Pie    
   }
 
 export type SignedUpload = {
@@ -54,7 +62,7 @@ export const validateDoc  = async (uploadMetadata : UploadMetadata, signature : 
 export const signDoc = async (
   fileName : string, 
   fundAddress : string, 
-  impliedFundAmount : number,
+  allocation : Pie,
   account : MetaMask, 
   fileContent : BytesLike) : Promise<[UploadMetadata, SignedUpload]> => {
     const metadata = {
@@ -62,7 +70,7 @@ export const signDoc = async (
       fundAddress,
       publicKey : account.signerAddress,
       timestamp : (new Date()).toISOString(),
-      impliedFundAmount
+      allocation
     }
 
     const hash = uploadHash(fileContent, metadata)

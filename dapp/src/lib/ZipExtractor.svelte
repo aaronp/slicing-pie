@@ -112,7 +112,6 @@
     }
   }
 
-  const fundName = (address : string) => fundsByAddress.find(e => e.address == address)?.label ?? address
   const gruntName = (address : string) => gruntsByAddress.find(e => e.address == address)?.label ?? address
 
   const handleDragOver = (event) => event.preventDefault()
@@ -121,8 +120,9 @@
     if (!uploadMetadata || !signatureUpload) {
       throw new Error("Bug: null uploadMetadata or signatureUpload")
     }
+    
     try {
-        const response = await gruntFund?.mintForKindFund(settings.kindContractAddress, uploadMetadata.publicKey, uploadMetadata.impliedFundAmount, signatureUpload.signature)
+        const response = await gruntFund?.mintForKindFund(settings.kindContractAddress, uploadMetadata.publicKey, uploadMetadata.allocation.pie, signatureUpload.signature)
         console.log(`submitted ${JSON.stringify(response)}`)
         return response
     } catch(e) {
@@ -136,7 +136,7 @@
     }
 
     try {
-        const response = await gruntFund?.mint(uploadMetadata.publicKey, uploadMetadata.impliedFundAmount, signatureUpload.signature)
+        const response = await gruntFund?.mint(uploadMetadata.publicKey, uploadMetadata.allocation.pie, signatureUpload.signature)
         console.log(`submitted ${JSON.stringify(response)}`)
         return response
     } catch(e) {
@@ -197,8 +197,9 @@
     </div>
   {/if}
     <div class="mt-4">
-      <p class="text-lg"><Tooltip title={uploadMetadata.publicKey}>"{toTitleCase(gruntName(uploadMetadata.publicKey))}"</Tooltip> is requesting {uploadMetadata.impliedFundAmount} {fundSymbol}</p>
-      <p class="">Their request was created at {uploadMetadata.timestamp}</p>
+      <p class="text-lg"><Tooltip title={uploadMetadata.publicKey}>"{toTitleCase(gruntName(uploadMetadata.publicKey))}"</Tooltip> is requesting {uploadMetadata.allocation.pie} {fundSymbol}</p>
+      <p class="text-sm opacity-50">{uploadMetadata.allocation.amount} * {uploadMetadata.allocation.multiplier} for {uploadMetadata.allocation.category} {uploadMetadata.allocation.role ? `(${uploadMetadata.allocation.role})` : ''}</p>
+      <p class="text-sm opacity-50">Request created at {uploadMetadata.timestamp}</p>
       
       {#if docLink}
       <div class="bg-blue mt-2 pt-2">

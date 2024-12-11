@@ -8,7 +8,7 @@
     import Calculator from "$lib/Calculator.svelte"
 
     import { type MetaMask } from "$lib"
-    import { type UploadMetadata, type SignedUpload, type DocLink, signDoc } from "./docsign"
+    import { type UploadMetadata, type SignedUpload, type DocLink, signDoc, type Pie } from "./docsign"
     import JSZip from "jszip"
 
 
@@ -29,11 +29,18 @@
     let message = $state('')
   
     // for the amont calculator
-    let pie = $state(0)
-    let category = $state('')
-    let role = $state('')
-    let roleDesc = $derived(role && category == 'Time' ? `(${role})` : "")
-    let amount = $state(0)
+    let allocation : Pie = $state({
+      role : '',
+      category : '',
+      pie : 0,
+      multiplier : 0,
+      amount : 0,
+    })
+    // let pie = $state(0)
+    // let category = $state('')
+    // let role = $state('')
+    // let amount = $state(0)
+    let roleDesc = $derived(allocation.role && allocation.category == 'Time' ? `(${allocation.role})` : "")
 
 
     let settings : Settings = $state(defaultSettings())
@@ -52,9 +59,7 @@
           // const fileContent = await readFileAsBase64(droppedFile)
           const fileContent = await readFileAsByteArray(droppedFile)
 
-          const impliedFundAmount = 123 // TODO - insert fund calculator to work out resulting PIE
-
-          const [metadata, signedUpload] = await signDoc(droppedFile.name, fundAddress, impliedFundAmount, account, fileContent)
+          const [metadata, signedUpload] = await signDoc(droppedFile.name, fundAddress, allocation, account, fileContent)
 
           return await createAndDownloadZip(fileContent, metadata, signedUpload)
         }
@@ -164,9 +169,7 @@
 
         console.log(`signing pasted contents for ${fileName}`)
 
-        const impliedFundAmount = 123 // TODO - insert fund calculator to work out resulting PIE
-
-        const [metadata, signedUpload] = await signDoc(fileName, fundAddress, impliedFundAmount, account, pastedBytes)
+        const [metadata, signedUpload] = await signDoc(fileName, fundAddress, allocation, account, pastedBytes)
 
         return await createAndDownloadZip(pastedBytes, metadata, signedUpload)     
 
@@ -210,35 +213,39 @@
   
   <div class="flex flex-col space-y-4 my-8">
     <h4>Pie Amount:</h4>
-    <Calculator categoies={settings?.categories ?? []} rates={settings?.rates ?? []} bind:pie={pie} bind:role={role} bind:category={category} bind:amount={amount}/>
-    <div class="text-xl opacity-50">{category} {roleDesc} @ {amount} = {pie}</div>
+    {#if !signedDocLink}
+    <Calculator categoies={settings?.categories ?? []} rates={settings?.rates ?? []} bind:pie={allocation.pie} bind:multiplier={allocation.multiplier}  bind:role={allocation.role} bind:category={allocation.category} bind:amount={allocation.amount} />
+    {/if}
+    <div class="text-xl opacity-50">{allocation.category} {roleDesc} @ {allocation.amount} x {allocation.multiplier} = {allocation.pie}</div>
   </div>
   <div class="flex flex-col items-center space-y-4">
     {#if message}
       <p>{message}</p>
     {/if}
 
-    
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div
-      tabindex="0" 
-      contenteditable="true" 
-      class="w-full max-w-md p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200 transition duration-200 drop-area"
-      ondrop={handleDrop}
-      ondragover={handleDragOver}
-      onpaste={handlePaste}
-    >
-    <!-- <input onpaste={handlePaste} /> -->
-    {#if droppedFile}
-      <p class="text-center text-gray-500 drop-target">
-        Uploaded {droppedFile.name}
-      </p>
-    {:else}
-      <p class="text-center text-gray-500">
-        Drag and drop or paste associated documents here
-      </p>
+    <!-- only show the upload if there is pie to allocate -->
+    {#if allocation.pie > 0}
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div
+        tabindex="0" 
+        contenteditable="true" 
+        class="w-full max-w-md p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200 transition duration-200 drop-area"
+        ondrop={handleDrop}
+        ondragover={handleDragOver}
+        onpaste={handlePaste}
+      >
+      <!-- <input onpaste={handlePaste} /> -->
+      {#if droppedFile}
+        <p class="text-center text-gray-500 drop-target">
+          Uploaded {droppedFile.name}
+        </p>
+      {:else}
+        <p class="text-center text-gray-500">
+          Drag and drop or paste associated documents
+        </p>
+      {/if}
+      </div>
     {/if}
-    </div>
   
     {#if signedDocLink}
     <div class="bg-blue m-2 p-2">

@@ -9,15 +9,16 @@
         // category : number,
         // amount : number,
         category : string,
-        role : string,
+        role : string | null,
         amount : number,
         pie : number,
+        multiplier : number
     }
 
 
     let userAmount : number = $state(0)
 
-    let { categoies, rates, role = $bindable(), category = $bindable(), amount = $bindable(), pie = $bindable() } : Props = $props()
+    let { categoies, rates, role = $bindable(), category = $bindable(), amount = $bindable(), pie = $bindable(), multiplier = $bindable() } : Props = $props()
 
     let categoryOptions = $derived(categoies.map(c => {
         return {
@@ -47,16 +48,15 @@
         role = chosenRole
         amount = userAmount
         
-        const found = categoies.find(c => c.label == chosenCategory)
-        const multiplier = found?.amount ?? 1
-        const timeMultiplier = rates.find(r => r.label === chosenRole)?.amount ?? 0
-
-        // console.log(`calculating w/ userAmount=${userAmount}, timeMultiplier=${timeMultiplier}, category=${category}, multiplier=${multiplier}`)
+        
         if (chosenCategory === firstCategory) {
-            pie = timeMultiplier * userAmount
+            multiplier = rates.find(r => r.label === chosenRole)?.amount ?? 0
         } else {
-            pie = multiplier * userAmount
+            const found = categoies.find(c => c.label == chosenCategory)
+            multiplier = found?.amount ?? 1
         }
+
+        pie = multiplier * userAmount
 
         // TODO - map symbols in settings
         switch (chosenCategory) {

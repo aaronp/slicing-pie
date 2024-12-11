@@ -1,17 +1,16 @@
 <script lang="ts">
-    import SelectOrCreate from "./SelectOrCreate.svelte";
 
-    import { onMount } from "svelte";
+    import { onMount } from "svelte"
 
-    import { GruntFund } from "./GruntFund"
     import Permissions from "./Permissions.svelte"
+    import SelectOrCreate from "./SelectOrCreate.svelte"
 
     import { ethers } from "ethers";
     import contractData from "../../../artifacts/contracts/KindFund.sol/KindFund.json"
 
     import { type MetaMask } from "$lib"
     import { loadSettings, saveSettings, type Settings, toMenuOptions } from "$lib/settings"
-    import { Toggle, Dialog, Button, TextField, Notification, type MenuOption } from "svelte-ux"
+    import { Button, Notification, type MenuOption } from "svelte-ux"
 
     type Props = {
         settings : Settings,
@@ -24,8 +23,7 @@
     const bytecode = contractData.bytecode
 
     let backingGruntFundAddress = $state("")
-    let owner = $state("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266")
-    let gruntFundAddressToPermission = $state("")
+    let owner = $state('')
     let message = $state("")
     let saving = $state(false)
     let newContractAddress = $state("")
@@ -33,18 +31,7 @@
     const onDeploy = async () => {
       const address = await deployContract(backingGruntFundAddress, owner)
       console.log(`deployed ${address}`)
-
-      // permission the underlying fund to allow the Kind contact to mint
-      // const underlying = await GruntFund.forAddress(gruntFundAddressToPermission)
-      // const isAllowedBefore = await underlying.isAllowedMinter(address)
-
-      // console.log(`isAllowed=${isAllowedBefore} for ${address}`)
-
-
-      // const isAllowedAfter = await underlying.isAllowedMinter(address)
-
-      // console.log(`isAllowed after=${isAllowedAfter} for ${address}`)
-
+      
     }
 
     
@@ -61,8 +48,6 @@
             newContractAddress = await contract.getAddress()
             message = `Contract deployed successfully at address: ${newContractAddress}`
             console.log(message)
-
-            gruntFundAddressToPermission = newContractAddress
 
             // update settings
             if (settings) {
