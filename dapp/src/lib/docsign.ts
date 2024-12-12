@@ -2,6 +2,8 @@ import type { MetaMask } from "$lib"
 import type { BytesLike } from "ethers"
 import { ethers } from "ethers"
 import { sha256, toUtf8Bytes } from "ethers"
+import { listPendingTransactions } from './pendingTransactions'
+import { GruntFund, type EventData } from "./GruntFund"
 
 export type Pie = {
   pie : number,
@@ -82,4 +84,50 @@ export const signDoc = async (
     }
 
     return [metadata, signedUpload]
+}
+
+
+export const chainContainsDocHash = async (events : EventData[], signedDocHash : string) => {
+  for (const e of events) {
+    if (e.event == "Allocated") {
+      const matches = signedDocHash === e.args.documentHash
+      console.log(`checking ${matches}: ${signedDocHash} === ${e.args.documentHash}`)        
+      if (matches) {
+        return true
+      }
+    }
+  }
+  console.log(`doc ${signedDocHash} is not in ${events.length} checked chain events`)
+  return false
+}
+
+/**
+ * We check both chain events and pending transactions to see if there is a mint with this samed signed document hash.
+ * This is to protect against double-payment, which is an off-chain operation (the rationale being that it simplifies the contract)
+ * 
+ * @param signedHash
+ */
+export const pendingTransactionsContainsDocHash = async (provider: ethers.Provider, signedHash :string) => {
+  const pending = await listPendingTransactions(provider)
+    
+  for (const p of pending) {
+    const txn = p.pendingTransaction.submittedTransaction
+    if (txn.data && txn.value) {
+      const fn =  GruntFund.parseTransaction(txn.data, txn.value)  
+      if (fn.name == 'mint') {
+        // the doc hash is the last argument in the mint function
+        const signedDocHash = fn.args[fn.args.length - 1]
+        if (signedHash == signedDocHash) {
+          console.error("The signed hash has already been submitted as a pending transaction")
+          return true
+        }
+      } else {
+        console.log(`skipping ${fn.name}`)
+      }
+    } else {
+      console.error(`skipping pending txn ${JSON.stringify(txn, null, 2)}`)
+    }
+  }
+  console.log(`didn't find ${signedHash} in ${pending.length} pending  chain events`)
+  return false
 }

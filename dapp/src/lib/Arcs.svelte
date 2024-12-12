@@ -67,7 +67,7 @@
     <!-- Render the arc path for each section -->
     <path
       d={createArcPathForSection(section)}
-      fill={`hsl(${index * 40}, 90%, 60%)`}
+      fill={`hsl(${index * 40}, 90%, 80%)`}
       fill-opacity="0.1"
       stroke="#333"
       stroke-width="1"

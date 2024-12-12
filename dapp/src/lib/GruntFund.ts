@@ -33,6 +33,21 @@ export class GruntFund {
   public signer : ethers.Signer
   public provider : ethers.Provider
 
+  static iface = () : ethers.Interface => new ethers.Interface(abi)
+
+  static parseTransaction = (data : string, value :string) => {
+    const decoded = GruntFund.iface().parseTransaction({
+      data,
+      value
+    })
+
+    return {
+      name : decoded?.name ?? '',
+      args : decoded?.args?.toArray(true) ?? []
+    }
+  }
+  
+
   constructor(contractAddress: string, provider: ethers.Provider, signer: ethers.Signer) {
     this.contract = new ethers.Contract(contractAddress, abi, provider)
     this.contractWithSigner = this.contract.connect(signer)
