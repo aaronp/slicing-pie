@@ -5,7 +5,7 @@
 	import { page } from '$app/stores'
     import { onMount } from "svelte"
     import { goto } from "$app/navigation"
-    import ZipExtractor from "$lib/ZipExtractor.svelte";
+    import ApproveAndMint from "$lib/ApproveAndMint.svelte";
 
     let pageName : string = $derived($page.url.pathname)
 	let fundAddress = $derived(idFromPath(pageName, 1))
@@ -36,7 +36,7 @@
 {message}
 {#if account && settings && gruntFund}
 
-    <ZipExtractor {settings} {account} {fundAddress} {gruntFund} {onBack}/>
+    <ApproveAndMint {settings} {account} {fundAddress} {gruntFund} {onBack}/>
 
 {:else}
     <p>Account is not connected</p>
