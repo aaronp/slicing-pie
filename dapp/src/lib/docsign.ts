@@ -91,8 +91,8 @@ export const chainContainsDocHash = async (events : EventData[], signedDocHash :
   for (const e of events) {
     if (e.event == "Allocated") {
       const matches = signedDocHash === e.args.documentHash
-      console.log(`checking ${matches}: ${signedDocHash} === ${e.args.documentHash}`)        
       if (matches) {
+        console.log(`Found submitted doc on chain: ${signedDocHash} === ${e.args.documentHash}`)
         return true
       }
     }
