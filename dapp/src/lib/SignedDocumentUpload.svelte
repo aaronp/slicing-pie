@@ -288,9 +288,9 @@
   <div class="grid grid-cols-1">
     <!-- calculator -->
     <div class="h-[13em]">
-      {#if !signedDocLink}
+      
       <Calculator categoies={settings?.categories ?? []} rates={settings?.rates ?? []} bind:pie={allocation.pie} bind:multiplier={allocation.multiplier}  bind:role={allocation.role} bind:category={allocation.category} bind:amount={allocation.amount} />
-      {/if}
+      
       <div class="text-xl opacity-50">{allocation.category} {roleDesc} @ {allocation.amount} x {allocation.multiplier} = {allocation.pie}</div>
     </div>
 
