@@ -1,16 +1,17 @@
 <script lang="ts">
     
-    import { defaultSettings, loadSettings, type Settings } from "./settings";
-
-    import { onMount } from "svelte";
+    import { defaultSettings, loadSettings, type Settings } from "./settings"
+    import { Steps, Step } from 'svelte-ux'
+    import { onMount } from "svelte"
 
     import type { BytesLike } from "ethers"
     import Calculator from "$lib/Calculator.svelte"
 
+    import { mdiCalculator, mdiCheck, mdiCreditCardOutline, mdiDownload, mdiListBoxOutline, mdiSignature, mdiTruckDeliveryOutline, mdiUpload } from '@mdi/js'
+
     import { type MetaMask } from "$lib"
     import { type UploadMetadata, type SignedUpload, type DocLink, signDoc, type Pie } from "./docsign"
     import JSZip from "jszip"
-
 
     type FileLike = {
       name : string
@@ -209,8 +210,72 @@
       })
     }
 
+    // steps are: 
+    // 0. use calculator to specify amount (e.g. category (time) x rate )
+    // 1. upload signed docs (e.g. timesheet, evidence, screenshot, whatever) - something signed by the grunt
+    // 2. sign (via metamask)
+    // 3. download the signed zip 
+
+    let step = 0
+
+    const active1 = "bg-danger text-danger-content"
+    const active = "bg-primary text-primary-content"
+    const passive1 = "bg-secondary text-secondary-content"
+    const passive = ""
   </script>
   
+<div class="grid grid-cols-[auto,1fr]">
+  <div class="border px-2">
+    <Steps vertical>
+      <!-- STEP 1 -->
+      <Step class="h-10" point="?" icon={mdiCalculator} completed={step >= 0} classes={{ line : passive }}  >Calculate Amount</Step>
+      <!-- this is a spacer -->
+      <Step point="" classes={{ point : "size-0", line : step > 1 ? active : passive }} completed={step > 0} ></Step>
+      <Step point="" classes={{ point : "size-0", line : step > 1 ? active : passive  }} completed={step > 0} ></Step>
+      
+      
+      <!-- STEP 2 -->
+        <Step
+        icon={mdiUpload}
+        completed={step >= 1}
+      >
+      <span class={step < 1 ? "opacity-20" : ""}>Upload Docs</span>
+      </Step>
+      <!-- this is a spacer -->
+      <Step point="" classes={{ point : "size-0", line : step > 1 ? active : passive  }} completed={step > 2} ></Step>
+      <Step point="" classes={{ point : "size-0", line : step > 1 ? active : passive  }} completed={step > 2} ></Step>
+
+
+      <!-- STEP 3 -->
+      <Step
+        icon={mdiSignature}
+        completed={step >= 2}
+      >
+        <span class={step < 2 ? "opacity-20" : ""}>Signature</span>
+      </Step>
+      <!-- this is a spacer -->
+      <Step point="" classes={{ point : "size-0", line : step > 2 ? active : passive }} completed={step > 2} ></Step>
+      <Step point="" classes={{ point : "size-0", line : step > 2 ? active : passive }} completed={step > 2} ></Step>
+
+      <!-- STEP 4 -->
+      <Step icon={mdiDownload} completed={step > 2}>
+        
+        <span class={step < 3 ? "opacity-20" : ""}>Download & Submit</span>
+        </Step>
+    </Steps>
+
+  </div>
+  <div class="grid grid-cols-1 bg-red-100">
+    <div class="border h-32">Calculator</div>
+    <div class="border h-32">Upload</div>
+    <div class="border h-32">Sign</div>
+    <div class="border h-32">Submit</div>
+  </div>
+</div>
+
+
+
+
   <div class="flex flex-col space-y-4 my-8">
     <h4>Pie Amount:</h4>
     {#if !signedDocLink}
