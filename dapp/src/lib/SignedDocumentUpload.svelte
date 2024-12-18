@@ -1,13 +1,13 @@
 <script lang="ts">
     
     import { defaultSettings, loadSettings, type Settings } from "./settings"
-    import { Steps, Step } from 'svelte-ux'
+    import { Steps, Step, ProgressCircle, Icon } from 'svelte-ux'
     import { onMount } from "svelte"
 
     import type { BytesLike } from "ethers"
     import Calculator from "$lib/Calculator.svelte"
 
-    import { mdiCalculator, mdiCheck, mdiCreditCardOutline, mdiDownload, mdiListBoxOutline, mdiSignature, mdiTruckDeliveryOutline, mdiUpload } from '@mdi/js'
+    import { mdiAlertCircleCheck, mdiCalculator, mdiCheck, mdiCheckCircle, mdiCreditCardOutline, mdiDownload, mdiListBoxOutline, mdiSignature, mdiTruckDeliveryOutline, mdiUpload } from '@mdi/js'
 
     import { type MetaMask } from "$lib"
     import { type UploadMetadata, type SignedUpload, type DocLink, signDoc, type Pie } from "./docsign"
@@ -24,6 +24,9 @@
     }
 
     let { account, fundAddress } : Props = $props()
+
+    // track when the user is signing
+    let signing = $state(false)
 
     let signedDocLink : DocLink | null = $state(null)
 
@@ -183,7 +186,9 @@
       if (file) {
         droppedFile = file
 
+        signing = true
         await signDocument()
+        signing = false
       }
     }
   
@@ -216,16 +221,31 @@
     // 2. sign (via metamask)
     // 3. download the signed zip 
 
-    let step = 0
+    // they're on step 0 if the allocation.pie is zero.
+    // they're on step 1 if the uploaded doc is null
+    // they're on step 2 if the signed doc is null
+    // they're on the last step if all is good and there's a download link
+    let hasCalculator = $derived(allocation.pie > 0)
+    let hasDroppedFile = $derived(!!droppedFile)
+    let hasSignedLink = $derived(!!signedDocLink)
 
-    const active1 = "bg-danger text-danger-content"
+    let step1 = $derived(hasCalculator ? 1 : 0)
+    let step2 = $derived(hasDroppedFile ? 1 : 0)
+    let step3 = $derived(hasSignedLink ? 1 : 0)
+    
+    let step = $derived(step1 + step2 + step3)
+
     const active = "bg-primary text-primary-content"
-    const passive1 = "bg-secondary text-secondary-content"
     const passive = ""
   </script>
   
+
+{#if message}
+  <p>{message}</p>
+{/if}
+
 <div class="grid grid-cols-[auto,1fr]">
-  <div class="border px-2">
+  <div class="pt-[5em] px-2">
     <Steps vertical>
       <!-- STEP 1 -->
       <Step class="h-10" point="?" icon={mdiCalculator} completed={step >= 0} classes={{ line : passive }}  >Calculate Amount</Step>
@@ -265,61 +285,68 @@
     </Steps>
 
   </div>
-  <div class="grid grid-cols-1 bg-red-100">
-    <div class="border h-32">Calculator</div>
-    <div class="border h-32">Upload</div>
-    <div class="border h-32">Sign</div>
-    <div class="border h-32">Submit</div>
+  <div class="grid grid-cols-1">
+    <!-- calculator -->
+    <div class="h-[13em]">
+      {#if !signedDocLink}
+      <Calculator categoies={settings?.categories ?? []} rates={settings?.rates ?? []} bind:pie={allocation.pie} bind:multiplier={allocation.multiplier}  bind:role={allocation.role} bind:category={allocation.category} bind:amount={allocation.amount} />
+      {/if}
+      <div class="text-xl opacity-50">{allocation.category} {roleDesc} @ {allocation.amount} x {allocation.multiplier} = {allocation.pie}</div>
+    </div>
+
+    <!-- upload -->
+    <div class="h-[4em] pt-2">
+      {#if hasCalculator}
+        <div
+          tabindex="0" 
+          contenteditable="true" 
+          class="w-full max-w-md p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200 transition duration-200 drop-area"
+          ondrop={handleDrop}
+          ondragover={handleDragOver}
+          onpaste={handlePaste}
+        >
+        <!-- <input onpaste={handlePaste} /> -->
+        {#if droppedFile}
+          <p class="text-center text-gray-500 drop-target">
+            Uploaded {droppedFile.name}
+          </p>
+        {:else}
+          <p class="text-center text-gray-500">
+            Drag and drop or paste associated documents
+          </p>
+        {/if}
+        </div>
+      {/if}
+    </div>
+
+    <!--- signing -->
+    <div class="pl-2 pt-[5em] h-[7em]">
+      {#if signing}
+        <ProgressCircle
+          size={20}
+          class="text-info [--track-color:theme(colors.info/10%)]"
+          track
+        />
+      {:else}
+        {#if hasSignedLink}
+          <Icon data={mdiCheckCircle} class="text-green-700" style="font-size: 2em;" />
+        {/if}
+      {/if}
+    </div>
+
+    <!-- signature -->
+    <div class="h-[4em] pt-[6em]">
+      {#if signedDocLink}
+      <div class="bg-blue m-2 p-2">
+        <a class="text-blue-500 hover:text-blue-700 underline hover:underline-offset-4 focus:outline-none focus:ring focus:ring-blue-300 transition-all duration-200" 
+          href={signedDocLink.href} download={signedDocLink.fileName} >Send this document to the grunt fund manager</a>
+      </div>
+      {/if}
+    </div>
   </div>
 </div>
 
 
-
-
-  <div class="flex flex-col space-y-4 my-8">
-    <h4>Pie Amount:</h4>
-    {#if !signedDocLink}
-    <Calculator categoies={settings?.categories ?? []} rates={settings?.rates ?? []} bind:pie={allocation.pie} bind:multiplier={allocation.multiplier}  bind:role={allocation.role} bind:category={allocation.category} bind:amount={allocation.amount} />
-    {/if}
-    <div class="text-xl opacity-50">{allocation.category} {roleDesc} @ {allocation.amount} x {allocation.multiplier} = {allocation.pie}</div>
-  </div>
-  <div class="flex flex-col items-center space-y-4">
-    {#if message}
-      <p>{message}</p>
-    {/if}
-
-    <!-- only show the upload if there is pie to allocate -->
-    {#if allocation.pie > 0}
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <div
-        tabindex="0" 
-        contenteditable="true" 
-        class="w-full max-w-md p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200 transition duration-200 drop-area"
-        ondrop={handleDrop}
-        ondragover={handleDragOver}
-        onpaste={handlePaste}
-      >
-      <!-- <input onpaste={handlePaste} /> -->
-      {#if droppedFile}
-        <p class="text-center text-gray-500 drop-target">
-          Uploaded {droppedFile.name}
-        </p>
-      {:else}
-        <p class="text-center text-gray-500">
-          Drag and drop or paste associated documents
-        </p>
-      {/if}
-      </div>
-    {/if}
-  
-    {#if signedDocLink}
-    <div class="bg-blue m-2 p-2">
-      
-      <a class="text-blue-500 hover:text-blue-700 underline hover:underline-offset-4 focus:outline-none focus:ring focus:ring-blue-300 transition-all duration-200" 
-        href={signedDocLink.href} download={signedDocLink.fileName} >Send this document to the grunt fund manager</a>
-    </div>
-    {/if}
-  </div>
   
   <style>
     .drop-area {

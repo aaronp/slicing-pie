@@ -100,8 +100,9 @@
 </script>
 
 
-<div class={cls(chosenCategory === firstCategory ? "grid grid-cols-[auto,1fr,1fr] gap-2 w-3/4" : "grid grid-cols-[auto,1fr] gap-2 w-3/4")}>
-    <div class="border1">
+<!-- <div class={cls(chosenCategory === firstCategory ? "grid grid-cols-[auto,1fr,1fr] gap-2 w-3/4" : "grid grid-cols-[auto,1fr] gap-2 w-3/4")}> -->
+<div >
+    <div class="pt-0">
         <Field label="Category" >
             <SelectField options={categoryOptions} bind:value={chosenCategory} >
                 <div slot="option" let:option let:index let:selected let:highlightIndex>
@@ -120,7 +121,7 @@
     </div>
 
     {#if chosenCategory===firstCategory}
-        <div class="border1">
+        <div class="pt-2">
             <Field label="Role" >
                 <SelectField options={roles} bind:value={chosenRole} >
                     <div slot="option" let:option let:index let:selected let:highlightIndex>
@@ -139,7 +140,7 @@
         </div>
     {/if}
 
-    <div class="border1">
+    <div class="pt-2">
         <TextField classes={{
             input: "h-8 text-4xl mb-1",
           }} bind:value={userAmount} label={amountLabel} >
