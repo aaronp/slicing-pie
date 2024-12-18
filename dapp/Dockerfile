@@ -28,7 +28,4 @@ LABEL org.opencontainers.image.url="https://kindservices.co.uk"
 LABEL license="Apache-2.0"
 LABEL vendor="Kind Services Ltd"
 
-
-VOLUME ["/app/data", "/app/output", "/app/imports"]
-
 ENTRYPOINT ["node", "build"]
