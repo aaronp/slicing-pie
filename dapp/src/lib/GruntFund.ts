@@ -106,7 +106,7 @@ export class GruntFund {
   }
 
 
-  async events(from : string = 'earliest') : Promise<EventData[]> {
+  async gruntFundEvents(from : string = 'earliest') : Promise<EventData[]> {
     const filter = {
       address: await this.contract.getAddress(),
       fromBlock: from,

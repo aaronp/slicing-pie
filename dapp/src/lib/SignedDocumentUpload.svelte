@@ -297,8 +297,10 @@
     <!-- upload -->
     <div class="h-[4em] pt-2">
       {#if hasCalculator}
+        <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         <div
           tabindex="0" 
+          role="region" 
           contenteditable="true" 
           class="w-full max-w-md p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-100 hover:bg-gray-200 transition duration-200 drop-area"
           ondrop={handleDrop}

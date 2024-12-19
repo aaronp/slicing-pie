@@ -67,7 +67,6 @@ settings({
 				<NavItem icon={mdiHome} text="Dashboard" currentUrl={$page.url} path="/" ></NavItem>
 			</div>
 			<div class="self-start m-2 text-white">
-				<!-- <a href="/settings" ><Icon data={mdiCog} /><span class="p-2">Settings</span></a> -->
 				<NavItem icon={mdiCog} text="Settings" currentUrl={$page.url} path="/settings" ></NavItem>
 			</div>
 

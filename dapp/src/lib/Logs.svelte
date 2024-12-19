@@ -19,7 +19,7 @@
   
     let gruntSymbol = $state('')
     onMount(async () => {
-      events = contract instanceof GruntFund ? await contract.events() : await (contract as KindFund).events()
+      events = contract instanceof GruntFund ? await contract.gruntFundEvents() : await (contract as KindFund).events()
       const provider = contract instanceof GruntFund ? contract.provider : (contract as KindFund).provider
       pending = await listAndUpdatePendingTransactions(provider)
       

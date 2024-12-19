@@ -13,8 +13,8 @@
     mdiCheckCircleOutline
   } from '@mdi/js'
 
-  import {  type MetaMask } from '$lib'
-  import { toLabels, toMap, type Settings } from '$lib/settings'
+  import {  asLink, type MetaMask } from '$lib'
+  import { toLabels, type Settings } from '$lib/settings'
   import JSZip from 'jszip'
 
     
@@ -154,7 +154,7 @@
 
 
     // check we've not already submitted an approval for this doc hash
-    const events = await gruntFund?.events()
+    const events = await gruntFund?.gruntFundEvents()
     let alreadyMinted = await chainContainsDocHash(events, signatureUpload?.signature)
 
     if (alreadyMinted) {
@@ -233,7 +233,7 @@
         Uploaded file:
         <Tooltip title="document hash: {signatureUpload.hash}\nsignature: {signatureUpload.signature}">
           <a class="text-blue-500 hover:text-blue-700 underline hover:underline-offset-4 focus:outline-none focus:ring focus:ring-blue-300 transition-all duration-200" 
-          href={docLink.href} download={docLink.fileName} >{docLink.fileName}</a>
+          href={asLink(docLink.href)} download={docLink.fileName} >{docLink.fileName}</a>
         </Tooltip>
       </div>
       {/if}
@@ -259,7 +259,7 @@
     <p class="text-red-300"><Icon class="my-4 mr-4" data={mdiAlert}/>Note: be sure to upload {#if uploadLink}
       <span class="bg-blue mt-2 pt-2">
         <a class="text-blue-500 hover:text-blue-700 underline hover:underline-offset-4 focus:outline-none focus:ring focus:ring-blue-300 transition-all duration-200" 
-          href={uploadLink.href} download={uploadLink.fileName} >the uploaded document</a>
+          href={asLink(uploadLink.href)} download={uploadLink.fileName} >the uploaded document</a>
       </span>
       {:else}
       this document

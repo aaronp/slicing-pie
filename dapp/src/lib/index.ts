@@ -1,4 +1,17 @@
 import { ethers, JsonRpcApiProvider, JsonRpcSigner } from 'ethers'
+import { base } from '$app/paths'
+
+export const asLink = (link: string) => {
+  if (process.env.NODE_ENV === 'development') {
+    return link
+  }
+
+  if (link === '/') {
+    return base
+  }
+
+  return base + link
+}
 
 export type Balance = {
   label : string,
