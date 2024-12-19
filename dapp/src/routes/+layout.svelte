@@ -115,10 +115,3 @@ settings({
 		<slot />
 	</main>
 </AppLayout>
-
-<style>
-	.arrow {
-		cursor: pointer;
-		display: inline-block;
-	}
-</style>
