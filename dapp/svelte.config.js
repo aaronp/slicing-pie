@@ -17,7 +17,8 @@ const config = {
 			fallback: '200.html' // may differ from host to host
 		}),
 		paths: {
-            base: process.env.NODE_ENV === 'production' ? '/slicing-pie' : '',
+			//  /slicing-pie
+            base: process.env.NODE_ENV === 'production' ? '' : '',
         },
 		prerender : {
 			handleHttpError : 'warn'
