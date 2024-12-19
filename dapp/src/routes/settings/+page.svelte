@@ -133,5 +133,3 @@
 
   <div class="text-lg"><TextField on:change={() => onChangeAddress()} labelPlacement="float" hint="The address of the deployed grunt fund contract" class="w-3/4 text-lg mt-2" label="Contract Address" bind:value={kindContractAddress} /></div>
 </div>
-
-<pre>{JSON.stringify(settings, null, 2)}</pre>
